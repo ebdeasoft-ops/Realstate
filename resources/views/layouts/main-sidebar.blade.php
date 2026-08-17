@@ -137,6 +137,9 @@
                     </a>
                     <ul class="slide-menu">
                         <li><a href="{{ route('tenants.index') }}" class="slide-item">إدارة المستأجرين</a></li>
+                                <li><a href="{{ route('payments.index') }}" class="slide-item"><i
+                                    class="fa-solid fa-money-bill-wave me-1"></i> إدارة الدفعات</a></li>
+                 
                         <!-- يمكنك إضافة عناصر جديدة هنا لاحقاً -->
                     </ul>
                 </li>

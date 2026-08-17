@@ -33,7 +33,7 @@
                 <h5 class="mb-0 text-primary"><i class="fas fa-user-plus mr-2"></i> {{ __('realestate.add_owner') }}</h5>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="{{ route('owners.index') }}" class="btn btn-secondary btn-custom shadow-sm">
-                        <i class="fas fa-arrow-right"></i> {{ __('realestate.back') ?? 'رجوع' }}
+                        <i class="fas fa-arrow-right"></i> {{ __('realestate.back') }}
                     </a>
                 </div>
             </div>
@@ -43,18 +43,50 @@
                     @csrf
                     
                     <div class="mb-3">
-                        <label class="form-label font-weight-bold">{{ __('realestate.name') }}</label>
+                        <label class="form-label font-weight-bold">{{ __('realestate.owner_name') }}</label>
                         <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label font-weight-bold">{{ __('realestate.phone') }}</label>
+                        <label class="form-label font-weight-bold">{{ __('realestate.owner_phone') }}</label>
                         <input type="text" name="phone" class="form-control" value="{{ old('phone') }}">
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label font-weight-bold">{{ __('realestate.owner_address') }}</label>
+                        <input type="text" name="address" class="form-control" value="{{ old('address') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">{{ __('realestate.owner_nationality') }}</label>
+                        <input type="text" name="nationality" class="form-control" value="{{ old('nationality') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">{{ __('realestate.owner_id_number') }}</label>
+                        <input type="text" name="national_id" class="form-control" value="{{ old('national_id') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">{{ __('realestate.bank_name') }}</label>
+                        <select name="bank_name" class="form-control">
+                            <option value="">{{ __('realestate.choose_status') ?? 'اختر البنك...' }}</option>
+                            @foreach(__('realestate.saudi_banks_list') as $key => $bankName)
+                                <option value="{{ $key }}" {{ old('bank_name') == $key ? 'selected' : '' }}>
+                                    {{ $bankName }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label font-weight-bold">{{ __('realestate.bank_account') }}</label>
-                        <input type="text" name="bank_account" class="form-control" value="{{ old('bank_account') }}">
+                        <input type="text" name="bank_account_number" class="form-control" value="{{ old('bank_account_number') }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">{{ __('realestate.iban') }}</label>
+                        <input type="text" name="iban" class="form-control" value="{{ old('iban') }}">
                     </div>
 
                     <div class="text-center mt-4">

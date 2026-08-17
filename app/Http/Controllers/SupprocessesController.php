@@ -22,8 +22,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SupprocessesController extends Controller
 {
-
-
     public function importStockAjax(Request $request)
     {
         try {

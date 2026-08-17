@@ -52,13 +52,29 @@ use App\Http\Controllers\{
     PropertyController,
     OwnerController,
     LeaseContractController,
-    TenantController
+    TenantController,
+    PaymentController
     };
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/contract/view/{contract}', [LeaseContractController::class, 'publicShow'])
+    ->name('contracts.public_show')
+    ->middleware('signed');
+
+// مسارات إدارة الدفعات
+Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+// مسارات إدارة الأقساط والدفعات
+Route::get('/rent-installments', [PaymentController::class, 'index'])->name('installments.index');
+Route::post('/rent-installments/pay/{id}', [PaymentController::class, 'payInstallment'])->name('installments.pay');
+Route::post('/payments/store', [PaymentController::class, 'store'])->name('payments.store');
+Route::post('/rent-installments/update/{id}', [PaymentController::class, 'update'])->name('installments.update');
+Route::get('/rent-installments/pay/{id}', [PaymentController::class, 'pay'])->name('installments.pay');
+Route::post('/rent-installments/store', [PaymentController::class, 'storePayment'])->name('installments.store');
+
 Route::get('property-control', [PropertyController::class, 'defaultControl'])->name('properties.control.default');
 Route::get('property-control/{id}', [PropertyController::class, 'showControl'])->name('properties.control');
 Route::resource('tenants', TenantController::class);
