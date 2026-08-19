@@ -11,11 +11,27 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
 {
-    public function index()
-    {
-        $owners = Owner::all();
-        return view('owners.index', compact('owners'));
+public function index(Request $request)
+{
+    $query = Owner::query();
+
+    // البحث بالاسم (من القائمة المنسدلة)
+    if ($request->filled('name')) {
+        $query->where('name', $request->name);
     }
+
+    // البحث برقم الهوية (من مربع النص)
+    if ($request->filled('national_id')) {
+        $query->where('national_id', 'like', '%' . $request->national_id . '%');
+    }
+
+    $owners = $query->latest()->paginate(10)->appends($request->all());
+    
+    // جلب قائمة بجميع الأسماء لتعبئة الـ Select
+    $allNames = Owner::pluck('name', 'name')->unique();
+
+    return view('owners.index', compact('owners', 'allNames'));
+}
 
     public function create()
     {

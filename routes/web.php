@@ -53,18 +53,40 @@ use App\Http\Controllers\{
     OwnerController,
     LeaseContractController,
     TenantController,
-    PaymentController
+    PaymentController,
+    PropertyExpenseController,
+    UnitTypeController
+    
     };
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
+Route::prefix('unit-types')->name('unit-types.')->group(function () {
+    Route::get('/', [UnitTypeController::class, 'index'])->name('index');
+    Route::post('/', [UnitTypeController::class, 'store'])->name('store');
+    Route::delete('/{id}', [UnitTypeController::class, 'destroy'])->name('destroy');
+});
 Route::get('/contract/view/{contract}', [LeaseContractController::class, 'publicShow'])
     ->name('contracts.public_show')
     ->middleware('signed');
+// مسارات مصروفات العقارات
+// مسارات مصروفات العقارات
+Route::get('/property-expenses', [PropertyExpenseController::class, 'index'])->name('property_expenses.index');
+Route::get('/property-expenses/create', [PropertyExpenseController::class, 'create'])->name('property_expenses.create');
+Route::post('/property-expenses', [PropertyExpenseController::class, 'store'])->name('property_expenses.store');
+Route::get('/property-expenses/report', [PropertyExpenseController::class, 'report'])->name('property_expenses.report');
+Route::get('reports/net-revenue', [PropertyExpenseController::class, 'netRevenueReport'])->name('reports.net_revenue');
 
-// مسارات إدارة الدفعات
+
+
+
+
+
+
+
+
 Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
 Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
 // مسارات إدارة الأقساط والدفعات
@@ -465,7 +487,7 @@ Route::middleware([
         Route::post('updatecustomerDataRecipt', 'updatecustomerDataRecipt');
         Route::post('reciptprinter', 'reciptprinter');
         Route::get('/dashboard', 'dashboard')->name('dashboard');
-
+        Route::get('/dashboard/search-listings', 'searchListings')->name('dashboard.search-listings');
         // المسارات السابقة للـ الكنترولر
         Route::post('save_delivery_sale', 'save_delivery_sale');
         Route::post('return_sale_delivery', 'return_sale_delivery');
@@ -565,6 +587,9 @@ Route::middleware([
 
     // 13. مجموعة التقارير الشاملة (Reports)
     Route::controller(ReportController::class)->group(function () {
+        Route::get('/reports/delayed-installments', 'delayedInstallmentsReport')->name('report.delayed_installments');
+        Route::get('/reports/expiring-contracts', 'expiringContractsReport')->name('report.expiring_contracts');
+        Route::get('reports/units-status',  'unitsStatusReport')->name('report.units_status');
         Route::get('/account_statement', 'account_statement');
         Route::get('/our_backup_database', 'serverDBBackup');
         Route::get('/Daily_record_report', 'Daily_record_report');

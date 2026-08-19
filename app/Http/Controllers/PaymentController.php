@@ -41,24 +41,24 @@ class PaymentController extends Controller
 
         return redirect()->back()->with('success', 'تم تسديد الدفعة بنجاح');
     }
-   public function index(Request $request)
+public function index(Request $request)
 {
-    // ابدأ بناء الاستعلام مع جدول الأقساط وعمل Join مع جدول العملاء (تأكد أن اسم جدول العملاء لديك customers أو tenants)
-    $query = DB::table('rent_installments')
-        ->leftJoin('customers', 'rent_installments.tenant_id', '=', 'customers.id')
-        ->select('rent_installments.*', 'customers.name as tenant_name');
+    // ابدأ بناء الاستعلام الأساسي للأقساط مع الـ Join
+    $baseQuery = DB::table('rent_installments')
+        ->leftJoin('customers', 'rent_installments.tenant_id', '=', 'customers.id');
 
-    // تصفية حسب المستأجر إذا تم اختياره
+    // تطبيق فلاتر البحث والفلترة على الاستعلام
+    $query = clone $baseQuery;
+    $query->select('rent_installments.*', 'customers.name as tenant_name');
+
     if ($request->filled('tenant_id')) {
         $query->where('rent_installments.tenant_id', $request->tenant_id);
     }
 
-    // تصفية حسب الوحدة إذا تم اختيارها
     if ($request->filled('unit_id')) {
         $query->where('rent_installments.unit_id', $request->unit_id);
     }
 
-    // تصفية حسب تاريخ الاستحقاق من وإلى
     if ($request->filled('from_date')) {
         $query->whereDate('rent_installments.due_date', '>=', $request->from_date);
     }
@@ -66,13 +66,60 @@ class PaymentController extends Controller
         $query->whereDate('rent_installments.due_date', '<=', $request->to_date);
     }
 
-    $installments = $query->get();
+    // جلب النتائج مع التقسيم (Paginate)
+    $installments = $query->paginate(10)->appends($request->all());
+
+    // --- حساب الإحصائيات (المربعات العلوية) مع مراعاة فلاتر البحث الحالية ---
+    $statsQuery = clone $baseQuery;
+    
+    // إعادة تطبيق الفلاتر على استعلام الإحصائيات لتكون دقيقة ومطابقة لما يشاهده المستخدم
+    if ($request->filled('tenant_id')) {
+        $statsQuery->where('rent_installments.tenant_id', $request->tenant_id);
+    }
+    if ($request->filled('unit_id')) {
+        $statsQuery->where('rent_installments.unit_id', $request->unit_id);
+    }
+    if ($request->filled('from_date')) {
+        $statsQuery->whereDate('rent_installments.due_date', '>=', $request->from_date);
+    }
+    if ($request->filled('to_date')) {
+        $statsQuery->whereDate('rent_installments.due_date', '<=', $request->to_date);
+    }
+
+    $today = now()->format('YYYY-MM-DD'); // أو التاريخ الحالي بصيغة مناسبة
+
+    // 1. إجمالي المبالغ المطلوبة / المستحقة (للمتبقي أو الإجمالي الكلي)
+    $totalAmount = (clone $statsQuery)->sum(DB::Raw('rent_installments.amount - rent_installments.paid_amount'));
+
+    // 2. المحصلة (المدفوعة بالكامل أو إجمالي المدفوع)
+    $totalPaid = (clone $statsQuery)->sum('rent_installments.paid_amount');
+
+    // 3. المتأخرة (تاريخ الاستحقاق فات ولم تسدد بالكامل ولم تصبح مدفوعة)
+    $totalOverdue = (clone $statsQuery)
+        ->whereDate('rent_installments.due_date', '<', now())
+        ->where('rent_installments.status', '!=', 'paid')
+        ->sum(DB::Raw('rent_installments.amount - rent_installments.paid_amount'));
+
+    // 4. قريبة الاستحقاق (خلال الأيام القادمة مثلاً من اليوم وحتى 5 أيام مقبلة وغير مدفوعة)
+    $totalWarning = (clone $statsQuery)
+        ->whereDate('rent_installments.due_date', '>=', now())
+        ->whereDate('rent_installments.due_date', '<=', now()->addDays(5))
+        ->where('rent_installments.status', '!=', 'paid')
+        ->sum(DB::Raw('rent_installments.amount - rent_installments.paid_amount'));
 
     // جلب القوائم المنسدلة للبحث
-    $tenants = DB::table('customers')->get(); // أو جدول المستأجرين لديك
-    $units = DB::table('units')->get(); // أو جدول الوحدات لديك
+    $tenants = DB::table('customers')->get(); 
+    $units = DB::table('units')->get(); 
 
-    return view('rents.installments', compact('installments', 'tenants', 'units'));
+    return view('rents.installments', compact(
+        'installments', 
+        'tenants', 
+        'units', 
+        'totalOverdue', 
+        'totalWarning', 
+        'totalPaid', 
+        'totalAmount'
+    ));
 }
 
 public function pay($id)
@@ -152,13 +199,17 @@ public function pay($id)
     // $ownerId = $property->owner_id ?? $request->owner_id; 
 
     // كمثال افتراضي لجلب المالك إذا كان مرتبطاً بالعقد أو الوحدة مباشرة:
-    $ownerId = $installment->UnitData->property->owner->id ?? $request->owner_id; 
 
-    $onwerAccount = financial_accounts::where('orginal_type', 2)->where('orginal_id', $ownerId)->first();
-    if ($onwerAccount) {
+
+    $financialAccount_Cach = financial_accounts::where('parent_account_number', 5)->where('branchs_id', Auth::user()->branchs_id)->first();
+    $financialAccount_Bank= financial_accounts::where('parent_account_number', 4)->where('branchs_id', Auth::user()->branchs_id)->first();
+
+    $ownerId = $request->pay_method=="cash"?$financialAccount_Cach->id:$financialAccount_Bank->id; 
+
+    if ($ownerId) {
         CreditTransactions::create([
             'user_id' => Auth::id(),
-            'customer_id' => $onwerAccount->id,
+            'customer_id' => $ownerId,
             'recive_amount' => $request->amount,
             'branchs_id' => Auth::user()->branchs_id ?? 1,
             'pay_method' => $request->pay_method ?? 1,

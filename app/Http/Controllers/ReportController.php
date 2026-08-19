@@ -50,12 +50,130 @@ use App\Exports\Export_Account_staatment;
 use App\Exports\ExpensesExport;
 use App\Exports\ProductsSalesAndPurchaseReport;
 use App\Exports\StockQuantityExport;
-
+use App\Models\RentInstallment;
 use Illuminate\Support\Facades\View;
-
+use App\Models\Tenant;
+use App\Models\LeaseContract;
+use App\Models\Property;
+use App\Models\Unit;
+use App\Models\UnitType;
 class ReportController extends Controller
 {
+    public function expiringContractsReport(Request $request)
+    {
+        $today = Carbon::today();
+        $tenants = Tenant::all();
 
+        $query = LeaseContract::with(['unit', 'tenant']);
+
+        if ($request->filled('tenant_id')) {
+            $query->where('tenant_id', $request->tenant_id);
+        }
+
+        if ($request->filled('period_value') && $request->filled('period_type')) {
+            $value = (int) $request->period_value;
+            if ($request->period_type == 'days') {
+                $targetDate = $today->copy()->addDays($value)->format('Y-m-d');
+                $query->whereDate('end_date', '<=', $targetDate);
+            } elseif ($request->period_type == 'months') {
+                $targetDate = $today->copy()->addMonths($value)->format('Y-m-d');
+                $query->whereDate('end_date', '<=', $targetDate);
+            }
+        } else {
+            $targetDate = $today->copy()->addDays(30)->format('Y-m-d');
+            $query->whereDate('end_date', '<=', $targetDate);
+        }
+
+        $allContracts = $query->orderBy('end_date', 'asc')->get();
+
+        // تقسيم العقود إلى: منتهية بالفعل، والتي ستنتهي قريباً
+        $expiredContracts = $allContracts->filter(function ($contract) use ($today) {
+            return Carbon::parse($contract->end_date)->isPast();
+        });
+
+        $upcomingContracts = $allContracts->filter(function ($contract) use ($today) {
+            return !Carbon::parse($contract->end_date)->isPast();
+        });
+
+        return view('reports.expiring_contracts', compact('expiredContracts', 'upcomingContracts', 'tenants', 'today'));
+    }
+    public function delayedInstallmentsReport(Request $request)
+    {
+        $today = Carbon::today();
+        $tenants = Tenant::all();
+        $properties = Property::pluck('name', 'id'); // جلب العقارات من جدول العقارات مباشرة
+
+        $query = RentInstallment::with(['UnitData', 'tenantData', 'contract'])
+            ->whereIn('status', ['unpaid', 'partially_paid'])
+            ->whereDate('due_date', '<', $today->format('Y-m-d'));
+
+        if ($request->filled('tenant_id')) {
+            $query->where('tenant_id', $request->tenant_id);
+        }
+
+        // فلتر حسب العقار (بفرض أن الوحدة ترتبط بالعقار عبر building_id)
+        // فلتر حسب العقار
+// فلتر حسب العقار
+        if ($request->filled('property_id')) {
+            $query->whereHas('UnitData', function ($q) use ($request) {
+                $q->where('property_id', $request->property_id); // تأكد أن اسم العمود في جدول units هو property_id أو استبدله بالعمود الصحيح
+            });
+        }
+        if ($request->filled('delay_value') && $request->filled('delay_type')) {
+            $value = (int) $request->delay_value;
+            if ($request->delay_type == 'days') {
+                $limitDate = $today->copy()->subDays($value)->format('Y-m-d');
+                $query->whereDate('due_date', '<=', $limitDate);
+            } elseif ($request->delay_type == 'months') {
+                $limitDate = $today->copy()->subMonths($value)->format('Y-m-d');
+                $query->whereDate('due_date', '<=', $limitDate);
+            }
+        }
+
+        $delayedInstallments = $query->orderBy('due_date', 'asc')->get();
+
+        return view('reports.delayed_installments', compact('delayedInstallments', 'tenants', 'properties', 'today'));
+    }
+
+  public function unitsStatusReport(Request $request)
+    {
+        $today = Carbon::today();
+        $soonDate = $today->copy()->addDays(30);
+
+        // 1. جلب جميع أنواع الوحدات لإرسالها لفلتر البحث في الـ Blade
+        $unitTypes = UnitType::all();
+
+        // 2. إضافة 'unitType' لتقليل استعلامات قاعدة البيانات أثناء العرض
+        $query = Unit::with(['property', 'activeContract', 'unitType']);
+
+        // 3. التصحيح هنا: جدول units فعليًا فيه عمود اسمه unit_category
+        //    مش unit_type_id (شفنا كده في phpMyAdmin)، فلازم الفلتر يبحث
+        //    بالاسم الصحيح للعمود عشان ميديش SQLSTATE[42S22] تاني
+        if ($request->filled('unit_type_id')) {
+            $query->where('unit_category', $request->unit_type_id);
+        }
+
+        if ($request->filled('status_filter')) {
+            
+            if ($request->status_filter == 'available') {
+                $query->where('is_rented', '0');
+            } elseif ($request->status_filter == 'expiring_soon') {
+                $query->whereHas('activeContract', function ($q) use ($today, $soonDate) {
+                    $q->whereBetween('end_date', [$today, $soonDate]);
+                });
+            }
+        }
+
+        // ترتيب النتائج بحيث المتاحة تظهر أولاً
+        $units = $query->orderByRaw("FIELD(status, 'available') DESC")
+            ->orderBy('unit_number', 'asc')
+            ->get();
+
+        // 4. إرسال $unitTypes مع $units إلى الـ View
+        return view('reports.units_status', compact('units', 'unitTypes'));
+    }
+    
+    
     public function search_credit_collection(Request $request)
     {
         app()->setLocale(LaravelLocalization::getCurrentLocale());
@@ -474,38 +592,38 @@ class ReportController extends Controller
         return view('reports.purchase_product_by_date');
     }
 
-public function search_purchase_product_by_date(Request $request)
-{
-    $query = orderDetails::query()
-        ->join('resource_purchases', 'order_details.order_owner', '=', 'resource_purchases.orderId')
-        ->whereDate('order_details.created_at', '>=', $request->start_at)
-        ->whereDate('order_details.created_at', '<=', $request->end_at)
-        ->where('order_details.save', 1);
+    public function search_purchase_product_by_date(Request $request)
+    {
+        $query = orderDetails::query()
+            ->join('resource_purchases', 'order_details.order_owner', '=', 'resource_purchases.orderId')
+            ->whereDate('order_details.created_at', '>=', $request->start_at)
+            ->whereDate('order_details.created_at', '<=', $request->end_at)
+            ->where('order_details.save', 1);
 
-    // فلترة الفرع مباشرة من جدول resource_purchases
-    if ($request->branch != '-') {
-        $query->where('resource_purchases.branchs_id', $request->branch);
-    }
+        // فلترة الفرع مباشرة من جدول resource_purchases
+        if ($request->branch != '-') {
+            $query->where('resource_purchases.branchs_id', $request->branch);
+        }
 
-    // التجميع حسب المنتج (مع تحديد order_details لتجنب تداخل الأعمدة)
-    $productsQuery = $query->select('order_details.product_id')
-        ->selectRaw('SUM(order_details.numberofpice) as total_quantity')
-        ->selectRaw('SUM(order_details.numberofpice * order_details.purchasingـprice) as total_sales_amount')
-        ->groupBy('order_details.product_id')
-        ->with('productData');
+        // التجميع حسب المنتج (مع تحديد order_details لتجنب تداخل الأعمدة)
+        $productsQuery = $query->select('order_details.product_id')
+            ->selectRaw('SUM(order_details.numberofpice) as total_quantity')
+            ->selectRaw('SUM(order_details.numberofpice * order_details.purchasingـprice) as total_sales_amount')
+            ->groupBy('order_details.product_id')
+            ->with('productData');
 
-    // إذا كان الطلب تصدير Excel
-    if ($request->action == 'export') {
+        // إذا كان الطلب تصدير Excel
+        if ($request->action == 'export') {
+            $products = $productsQuery->get();
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\SalesProductExport($products),
+                'sales_products_report.xlsx'
+            );
+        }
+
         $products = $productsQuery->get();
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\SalesProductExport($products),
-            'sales_products_report.xlsx'
-        );
+        return view('reports.print_purchase_product_by_date', compact('products'));
     }
-
-    $products = $productsQuery->get();
-    return view('reports.print_purchase_product_by_date', compact('products'));
-}
 
     public function SalesPurchaseInPeriode()
     {
@@ -571,10 +689,10 @@ public function search_purchase_product_by_date(Request $request)
         app()->setLocale(LaravelLocalization::getCurrentLocale());
         return view('reports.profit_and_lost');
     }
-// جلب أبناء فرع معين عبر الـ AJAX عند الضغط عليه
-  
+    // جلب أبناء فرع معين عبر الـ AJAX عند الضغط عليه
 
-  public function budgetsheet_general(Request $request)
+
+    public function budgetsheet_general(Request $request)
     {
         app()->setLocale(LaravelLocalization::getCurrentLocale());
 
@@ -591,7 +709,7 @@ public function search_purchase_product_by_date(Request $request)
             ->where('credittransactions.save', 1)
             ->whereBetween('credittransactions.created_at', ['2020-01-01', $end_at . ' 23:59:59'])
             ->select(
-                'financial_accounts.id as account_row_id', 
+                'financial_accounts.id as account_row_id',
                 DB::raw("SUM(CASE WHEN DATE(credittransactions.created_at) < '{$start_at}' THEN credittransactions.debtor ELSE 0 END) as open_debtor"),
                 DB::raw("SUM(CASE WHEN DATE(credittransactions.created_at) < '{$start_at}' THEN credittransactions.creditor ELSE 0 END) as open_creditor"),
                 DB::raw("SUM(CASE WHEN DATE(credittransactions.created_at) >= '{$start_at}' AND DATE(credittransactions.created_at) <= '{$end_at}' THEN credittransactions.debtor ELSE 0 END) as curr_debtor"),
@@ -601,14 +719,14 @@ public function search_purchase_product_by_date(Request $request)
             ->get()
             ->keyBy('account_row_id');
 
-   $accountTotals = [];
+        $accountTotals = [];
         foreach ($allAccounts as $acc) {
             // فحص مباشر من قاعدة البيانات: هل هذا الحساب لديه أبناء (parent_account_number يساوي id هذا الحساب أو رقم حسابه)؟
             $hasChildren = DB::table('financial_accounts')
                 ->where('parent_account_number', $acc->id)
                 ->exists();
 
-            if ($hasChildren ) {
+            if ($hasChildren) {
                 // إذا كان أباً (مثل الخزينة): نجعل أقماره صفراً تماماً لكي تظهر علامة (-)
                 $accountTotals[$acc->id] = [
                     'debtor' => 0,
@@ -620,7 +738,7 @@ public function search_purchase_product_by_date(Request $request)
                 // إذا لم يكن أباً (حساب فرعي نهائي): نحسب حركاته المباشرة فقط
                 $totalDebtor = 0;
                 $totalCreditor = 0;
-                if(isset($transactions[$acc->id])) {
+                if (isset($transactions[$acc->id])) {
                     $t = $transactions[$acc->id];
                     $totalDebtor += ($t->open_debtor + $t->curr_debtor);
                     $totalCreditor += ($t->open_creditor + $t->curr_creditor);
@@ -633,47 +751,49 @@ public function search_purchase_product_by_date(Request $request)
                 ];
             }
         }
-            $rootAccounts = $allAccounts->whereIn('account_type', [1, 2, 3, 4, 5])
-            ->where(function($q) {
+        $rootAccounts = $allAccounts->whereIn('account_type', [1, 2, 3, 4, 5])
+            ->where(function ($q) {
                 return $q->parent_account_number == null || $q->parent_account_number == 0;
             });
 
         return view('reports.budgetsheet_general', compact(
-            'rootAccounts', 
-            'types', 
+            'rootAccounts',
+            'types',
             'allAccounts',
             'accountTotals',
-            'start_at', 
+            'start_at',
             'end_at'
         ));
     }
 
     // دالة مساعدة داخل الـ Controller لحساب مجموع الحساب وأبنائه
-private static function calculateTotalWithChildren($accountId, $allAccounts, $transactions) {
+    private static function calculateTotalWithChildren($accountId, $allAccounts, $transactions)
+    {
         $totalDebtor = 0;
         $totalCreditor = 0;
 
         $account = $allAccounts->firstWhere('id', $accountId);
-        if (!$account) return ['debtor' => 0, 'creditor' => 0, 'balance' => 0];
+        if (!$account)
+            return ['debtor' => 0, 'creditor' => 0, 'balance' => 0];
 
-        $accIdStr = trim((string)$account->id);
+        $accIdStr = trim((string) $account->id);
 
         // جلب الأبناء المباشرين بالاعتماد على الـ ID فقط
-        $children = $allAccounts->filter(function($item) use ($accIdStr) {
-            $parentVal = trim((string)$item->parent_account_number);
+        $children = $allAccounts->filter(function ($item) use ($accIdStr) {
+            $parentVal = trim((string) $item->parent_account_number);
             return $parentVal === $accIdStr;
         });
 
         // إذا كان له أبناء، نجمع أرصدة أبنائه فقط
         if ($children->isNotEmpty()) {
-            foreach($children as $child) {
+            foreach ($children as $child) {
                 $childTotals = self::calculateTotalWithChildren($child->id, $allAccounts, $transactions);
                 $totalDebtor += $childTotals['debtor'];
                 $totalCreditor += $childTotals['creditor'];
             }
         } else {
             // إذا لم يكن له أبناء، نأخذ حركاته المباشرة فقط
-            if(isset($transactions[$accountId])) {
+            if (isset($transactions[$accountId])) {
                 $t = $transactions[$accountId];
                 $totalDebtor += ($t->open_debtor + $t->curr_debtor);
                 $totalCreditor += ($t->open_creditor + $t->curr_creditor);
@@ -694,7 +814,7 @@ private static function calculateTotalWithChildren($accountId, $allAccounts, $tr
 
         // البحث عن الحساب الأب لمعرفة رقم الحساب (account_number) أو الـ id
         $parentAccount = financial_accounts::where('account_number', $accountId)->orWhere('id', $accountId)->first();
-        
+
         $children = collect();
         if ($parentAccount) {
             // جلب الأبناء الذين يتبعون هذا الحساب
@@ -704,7 +824,7 @@ private static function calculateTotalWithChildren($accountId, $allAccounts, $tr
         }
 
         $accountIds = $children->pluck('id')->toArray();
-        
+
         $directBalances = collect();
         if (!empty($accountIds)) {
             $directBalances = DB::table('credittransactions')
@@ -713,7 +833,7 @@ private static function calculateTotalWithChildren($accountId, $allAccounts, $tr
                 ->whereIn('financial_accounts.id', $accountIds)
                 ->whereBetween('credittransactions.created_at', ['2020-01-01', $end_at . ' 23:59:59'])
                 ->select(
-                    'financial_accounts.id as account_row_id', 
+                    'financial_accounts.id as account_row_id',
                     DB::raw("SUM(CASE WHEN DATE(credittransactions.created_at) < '{$start_at}' THEN credittransactions.debtor ELSE 0 END) as open_debtor"),
                     DB::raw("SUM(CASE WHEN DATE(credittransactions.created_at) < '{$start_at}' THEN credittransactions.creditor ELSE 0 END) as open_creditor"),
                     DB::raw("SUM(CASE WHEN DATE(credittransactions.created_at) >= '{$start_at}' AND DATE(credittransactions.created_at) <= '{$end_at}' THEN credittransactions.debtor ELSE 0 END) as curr_debtor"),
@@ -732,7 +852,7 @@ private static function calculateTotalWithChildren($accountId, $allAccounts, $tr
                 ->exists();
 
             if ($child->is_parent == 1 || $hasSubChildren) {
-                $directBalances[$child->id] = (object)[
+                $directBalances[$child->id] = (object) [
                     'open_debtor' => 0,
                     'open_creditor' => 0,
                     'curr_debtor' => 0,
@@ -1536,7 +1656,7 @@ private static function calculateTotalWithChildren($accountId, $allAccounts, $tr
         if ($branch != '-') {
             $salesQuery->where('branch_id', $branch);
             $returnSalesQuery->where('branch_id', $branch);
-$orderDetailsQuery->whereHas('order', function($q) use ($branch) {
+            $orderDetailsQuery->whereHas('order', function ($q) use ($branch) {
                 $q->where('branchs_id', $branch); // العمود branchs_id الموجود في جدول resource_purchases
             });            // ملاحظة: إذا كانت جداول التحويلات والتحديثات تحتوي على branch_id قم بتفعيل الفلاتر لها هنا أيضاً:
             // $movementsQuery->where('branch_id', $branch);
@@ -2001,45 +2121,45 @@ $orderDetailsQuery->whereHas('order', function($q) use ($branch) {
         app()->setLocale(LaravelLocalization::getCurrentLocale());
         return view('reports.print_customeList');
     }
-public function Customerlist()
-{
-    app()->setLocale(LaravelLocalization::getCurrentLocale());
+    public function Customerlist()
+    {
+        app()->setLocale(LaravelLocalization::getCurrentLocale());
 
-    // تحديد تاريخ البداية (أول السنة الحالية 2026) وتاريخ النهاية (اليوم)
-    $startDate = date('Y') . '-01-01';
-    $endDate = date('Y-m-d');
+        // تحديد تاريخ البداية (أول السنة الحالية 2026) وتاريخ النهاية (اليوم)
+        $startDate = date('Y') . '-01-01';
+        $endDate = date('Y-m-d');
 
-    $customers = financial_accounts::whereIn('orginal_type', [1, 2])
-        // 1. مجموع الدائن (Credit)
-        ->withSum([
-            'credittransactions as total_credit' => function ($query) use ($startDate, $endDate) {
-                $query->where('save', 1);
-                
-                if ($startDate) {
-                    $query->whereDate('created_at', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('created_at', '<=', $endDate);
-                }
-            }
-        ], 'creditor')
-        // 2. مجموع المدين (Debit)
-        ->withSum([
-            'credittransactions as total_debit' => function ($query) use ($startDate, $endDate) {
-                $query->where('save', 1);
-                
-                if ($startDate) {
-                    $query->whereDate('created_at', '>=', $startDate);
-                }
-                if ($endDate) {
-                    $query->whereDate('created_at', '<=', $endDate);
-                }
-            }
-        ], 'debtor')
-        ->get();
+        $customers = financial_accounts::whereIn('orginal_type', [1, 2])
+            // 1. مجموع الدائن (Credit)
+            ->withSum([
+                'credittransactions as total_credit' => function ($query) use ($startDate, $endDate) {
+                    $query->where('save', 1);
 
-    return view('reports.customerList', compact('customers'));
-}
+                    if ($startDate) {
+                        $query->whereDate('created_at', '>=', $startDate);
+                    }
+                    if ($endDate) {
+                        $query->whereDate('created_at', '<=', $endDate);
+                    }
+                }
+            ], 'creditor')
+            // 2. مجموع المدين (Debit)
+            ->withSum([
+                'credittransactions as total_debit' => function ($query) use ($startDate, $endDate) {
+                    $query->where('save', 1);
+
+                    if ($startDate) {
+                        $query->whereDate('created_at', '>=', $startDate);
+                    }
+                    if ($endDate) {
+                        $query->whereDate('created_at', '<=', $endDate);
+                    }
+                }
+            ], 'debtor')
+            ->get();
+
+        return view('reports.customerList', compact('customers'));
+    }
 
 
     public function customerـpurchases()
@@ -2265,82 +2385,82 @@ public function Customerlist()
             ->with('end_at', $request->end_at);
     }
 
-public function search_stockquantity(Request $request)
-{
-    app()->setLocale(LaravelLocalization::getCurrentLocale());
-    
-    $branch = $request->branch;
-    $location = $request->Location;
-    $display = $request->choosequantitytodisplay;
-    $quantity = $request->quantity;
-    $endAt = $request->end_at;
+    public function search_stockquantity(Request $request)
+    {
+        app()->setLocale(LaravelLocalization::getCurrentLocale());
 
-    $query = \App\Models\products::query();
+        $branch = $request->branch;
+        $location = $request->Location;
+        $display = $request->choosequantitytodisplay;
+        $quantity = $request->quantity;
+        $endAt = $request->end_at;
 
-    if ($branch != '-') {
-        $query->where('branchs_id', $branch);
-    }
-    if ($location != '-') {
-        $query->where('Product_Location', 'LIKE', '%' . $location . '%');
-    }
-    if ($display == '==') {
-        $query->where('numberofpice', $quantity);
-    } else {
-        $query->where('numberofpice', $display, $quantity);
-    }
-    // جلب المنتجات وتجهيز الحسابات (لتجنب الكود داخل الـ Blade)
-    $products = $query->get()->map(function ($product) use ($endAt) {
-        $startAt = date('Y-01-01'); // افتراضياً بداية السنة الحالية
+        $query = \App\Models\products::query();
 
-        $salesQuery = \App\Models\sales::where('product_id', $product->id)->where('save', 1)->whereDate('created_at', '>=', $startAt);
-        $stockUpdateQuery = \App\Models\stock_update::where('product_id', $product->id)->whereDate('created_at', '>=', $startAt);
-        $productsDamageQuery = \App\Models\ProductsDamage::where('product_id', $product->id)->whereDate('created_at', '>=', $startAt);
-        $returnSalesQuery = \App\Models\return_sales::where('product_id', $product->id)->whereDate('created_at', '>=', $startAt);
-        $purchaseQuery = \App\Models\orderDetails::where('product_id', $product->id)->where('save', 1)->whereDate('created_at', '>=', $startAt);
+        if ($branch != '-') {
+            $query->where('branchs_id', $branch);
+        }
+        if ($location != '-') {
+            $query->where('Product_Location', 'LIKE', '%' . $location . '%');
+        }
+        if ($display == '==') {
+            $query->where('numberofpice', $quantity);
+        } else {
+            $query->where('numberofpice', $display, $quantity);
+        }
+        // جلب المنتجات وتجهيز الحسابات (لتجنب الكود داخل الـ Blade)
+        $products = $query->get()->map(function ($product) use ($endAt) {
+            $startAt = date('Y-01-01'); // افتراضياً بداية السنة الحالية
 
-        if (!empty($endAt)) {
-            $salesQuery->whereDate('created_at', '<=', $endAt);
-            $stockUpdateQuery->whereDate('created_at', '<=', $endAt);
-            $productsDamageQuery->whereDate('created_at', '<=', $endAt);
-            $returnSalesQuery->whereDate('created_at', '<=', $endAt);
-            $purchaseQuery->whereDate('created_at', '<=', $endAt);
+            $salesQuery = \App\Models\sales::where('product_id', $product->id)->where('save', 1)->whereDate('created_at', '>=', $startAt);
+            $stockUpdateQuery = \App\Models\stock_update::where('product_id', $product->id)->whereDate('created_at', '>=', $startAt);
+            $productsDamageQuery = \App\Models\ProductsDamage::where('product_id', $product->id)->whereDate('created_at', '>=', $startAt);
+            $returnSalesQuery = \App\Models\return_sales::where('product_id', $product->id)->whereDate('created_at', '>=', $startAt);
+            $purchaseQuery = \App\Models\orderDetails::where('product_id', $product->id)->where('save', 1)->whereDate('created_at', '>=', $startAt);
+
+            if (!empty($endAt)) {
+                $salesQuery->whereDate('created_at', '<=', $endAt);
+                $stockUpdateQuery->whereDate('created_at', '<=', $endAt);
+                $productsDamageQuery->whereDate('created_at', '<=', $endAt);
+                $returnSalesQuery->whereDate('created_at', '<=', $endAt);
+                $purchaseQuery->whereDate('created_at', '<=', $endAt);
+            }
+
+            $product->salescount = $salesQuery->sum('quantity');
+            $product->returnsalescount = $returnSalesQuery->sum('return_quantity');
+            $product->purchasecount = $purchaseQuery->sum('numberofpice');
+            $product->purchasereturncount = $purchaseQuery->sum('returns_purchase');
+
+            $stock_update = $stockUpdateQuery->get();
+            $product->stockincrease = $stock_update->sum('productincrease');
+            $product->stockdecrease = $stock_update->sum('productdecrease');
+
+            $product->damageproduct = $productsDamageQuery->sum('damage_quantity');
+
+            return $product;
+        });
+
+        // حساب الإجماليات الكلية
+        $totals = [
+            'opingstock' => $products->sum('opening_blance'),
+            'purchasecount' => $products->sum('purchasecount'),
+            'purchasereturncount' => $products->sum('purchasereturncount'),
+            'salescount' => $products->sum('salescount'),
+            'returnsalescount' => $products->sum('returnsalescount'),
+            'stockdecrease' => $products->sum('stockdecrease'),
+            'stockincrease' => $products->sum('stockincrease'),
+            'damageproduct' => $products->sum('damageproduct'),
+            'totalstock' => $products->sum('numberofpice'),
+            'totalprice' => $products->sum(fn($p) => $p->numberofpice * $p->purchasingـprice),
+        ];
+
+        // إذا طلب المستخدم تصدير إكسيل
+        if ($request->has('export_excel')) {
+            return Excel::download(new StockQuantityExport($products, $totals), 'stock_quantity_report.xlsx');
         }
 
-        $product->salescount = $salesQuery->sum('quantity');
-        $product->returnsalescount = $returnSalesQuery->sum('return_quantity');
-        $product->purchasecount = $purchaseQuery->sum('numberofpice');
-        $product->purchasereturncount = $purchaseQuery->sum('returns_purchase');
-        
-        $stock_update = $stockUpdateQuery->get();
-        $product->stockincrease = $stock_update->sum('productincrease');
-        $product->stockdecrease = $stock_update->sum('productdecrease');
-        
-        $product->damageproduct = $productsDamageQuery->sum('damage_quantity');
-
-        return $product;
-    });
-
-    // حساب الإجماليات الكلية
-    $totals = [
-        'opingstock' => $products->sum('opening_blance'),
-        'purchasecount' => $products->sum('purchasecount'),
-        'purchasereturncount' => $products->sum('purchasereturncount'),
-        'salescount' => $products->sum('salescount'),
-        'returnsalescount' => $products->sum('returnsalescount'),
-        'stockdecrease' => $products->sum('stockdecrease'),
-        'stockincrease' => $products->sum('stockincrease'),
-        'damageproduct' => $products->sum('damageproduct'),
-        'totalstock' => $products->sum('numberofpice'),
-        'totalprice' => $products->sum(fn($p) => $p->numberofpice * $p->purchasingـprice),
-    ];
-
-    // إذا طلب المستخدم تصدير إكسيل
-    if ($request->has('export_excel')) {
-        return Excel::download(new StockQuantityExport($products, $totals), 'stock_quantity_report.xlsx');
+        return view('reports.printstockquantity', compact('products', 'totals', 'endAt'));
     }
-
-    return view('reports.printstockquantity', compact('products', 'totals', 'endAt'));
-}
 
 
     public function search_shift_detailes(Request $request)
@@ -2784,7 +2904,7 @@ public function search_stockquantity(Request $request)
         $bestselling = collect($bestselling)->sortByDesc('numberofsall')->values()->all();
 
         return view('reports.Best_selling_products', compact('bestselling'))->with('branch_id', $request->branch)
-        ->with('end_at',  $request->end_at)->with('start_at',  $request->start_at);
+            ->with('end_at', $request->end_at)->with('start_at', $request->start_at);
     }
 
     public function search_VAT(Request $request)
@@ -2891,8 +3011,10 @@ public function search_stockquantity(Request $request)
         $productNo = $request->productNo;
         // استخدام علاقة المنتج هنا إذا كنت تعرض اسم المنتج في الـ View لتجنب الـ N+1 Query
         // مثال: orderDetails::with('product')
-        $query = orderDetails::whereBetween('created_at', [$request->start_at . ' 00:00:00', 
-                $request->end_at . ' 23:59:59'])
+        $query = orderDetails::whereBetween('created_at', [
+            $request->start_at . ' 00:00:00',
+            $request->end_at . ' 23:59:59'
+        ])
             ->where('save', 1);
 
         // تطبيق الشرط فقط إذا تم اختيار منتج محدد
@@ -2907,7 +3029,7 @@ public function search_stockquantity(Request $request)
     public function search_customerـpurchases(Request $request)
     {
         app()->setLocale(LaravelLocalization::getCurrentLocale());
-       $branch = $request->branch;
+        $branch = $request->branch;
         $userId = $request->UserId;
 
         // استخدام الاختصار الذكي (when) لتبسيط شروط الـ if/elseif المعقدة
@@ -2924,8 +3046,8 @@ public function search_stockquantity(Request $request)
         return view('reports.customerpurchases', compact('Invoices'))
             ->with('branch', [$userId, $branch])
             ->with('userid', [$userId, $branch])
-            ->with('start_at',$request->start_at,)
-            ->with('start_at',  $request->end_at);
+            ->with('start_at', $request->start_at, )
+            ->with('start_at', $request->end_at);
     }
 
     public function searchpurchasproducttocustomer(Request $request)
@@ -2956,7 +3078,7 @@ public function search_stockquantity(Request $request)
         $branch = $request->branch;
 
         $query = resource_purchases::where('recoveredـpieces', '!=', 0)
-            ->whereBetween('updated_at', [$request->start_at . ' 00:00:00',$request->end_at . ' 23:59:59']);
+            ->whereBetween('updated_at', [$request->start_at . ' 00:00:00', $request->end_at . ' 23:59:59']);
 
         if ($branch != '-') {
             $query->where('branchs_id', $branch);
@@ -2995,7 +3117,7 @@ public function search_stockquantity(Request $request)
 
         // 2. جلب الفواتير وتجميعها بضربة واحدة بدلاً من الـ foreach
         $totalsQuery = invoices::where('save', 1)->whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
         if ($branch != '-') {
             $totalsQuery->where('branchs_id', $branch);
         }
@@ -3013,19 +3135,19 @@ public function search_stockquantity(Request $request)
 
         // 3. تجهيز الـ Queries الأساسية بناءً على الفروع للتقليل من كتابة الأكواد المكررة
         $convertQuery = convertcashboxToBank::whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
         $returnSalesQuery = return_sales::whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
         $returnPurchasesQuery = resource_purchases::where('recoveredـpieces', '!=', 0)->where('save', 1)->whereBetween('updated_at', [$start_at, $end_at]);
         $purchaseQuery = resource_purchases::where('save', 1)->whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
         $bankBalanceQuery = cash_from__bank::whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
         $withdrawalQuery = Cash_withdrawal_from_the_bank::whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
 
         $creditTransBase = credittransactions::whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at);
+            ->whereDate('created_at', '<=', $end_at);
 
         $branchname = __('users.allbranchs');
 
@@ -3077,7 +3199,7 @@ public function search_stockquantity(Request $request)
             $date = date("Y-m-d", strtotime('-24 hours', strtotime($end_at)));
             $Transfer_cash_from_the_last_dayList = Transfer_cash_to_the_next_day::where('branchs_id', $branch)->whereDate('created_at', $date)->get();
             $totalconvertlastDayList = Transfer_cash_to_the_next_day::where('branchs_id', $branch)->whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at)->get();
+                ->whereDate('created_at', '<=', $end_at)->get();
 
             $transferMoney_to_mainbranch = ($branch == 1) ? transferMoney_to_mainbranch::whereBetween('updated_at', [$start_at, $end_at])->where('status', 1)->get() : [];
         }
@@ -3109,7 +3231,7 @@ public function search_stockquantity(Request $request)
                     continue;
 
                 $currentReturnSales = return_sales::where('invoice_id', $id)->whereDate('created_at', '>=', $start_at)
-    ->whereDate('created_at', '<=', $end_at)->get();
+                    ->whereDate('created_at', '<=', $end_at)->get();
                 $valuewithoudtax = 0;
 
                 foreach ($currentReturnSales as $returnsale) {
@@ -3436,7 +3558,7 @@ public function search_stockquantity(Request $request)
     /**
      * طلبات العروض المقدمة من الموردين
      */
- 
+
 
     /**
      * تقرير مبيعات منتج محدد
@@ -3494,7 +3616,7 @@ public function search_stockquantity(Request $request)
             ->where('save', 1)
             ->get();
 
-        return view('reports.employeesales', compact('Invoices'))->with('start_at',$request->start_at)->with('end_at',$request->end_at)->with('userId',$request->productname);
+        return view('reports.employeesales', compact('Invoices'))->with('start_at', $request->start_at)->with('end_at', $request->end_at)->with('userId', $request->productname);
     }
 
     /**
@@ -3821,8 +3943,8 @@ public function search_stockquantity(Request $request)
         $supplierId = $request->supplierId;
 
         $query = orderTosupllier::where('Limit_credit', '')
-                                ->whereDate('created_at', '>=', $request->start_at)
-                                ->whereDate('created_at', '<=', $request->end_at);
+            ->whereDate('created_at', '>=', $request->start_at)
+            ->whereDate('created_at', '<=', $request->end_at);
 
         if ($supplierId !== '-') {
             $query->where('suplier_id', $supplierId);
@@ -4394,7 +4516,7 @@ public function search_stockquantity(Request $request)
         return view('reports.print_stock_update', compact('stock_update'));
     }
 
-    
+
     public function print_products_Transfer($branch_from, $branch_to, $startat, $end_at)
     {
         app()->setLocale(LaravelLocalization::getCurrentLocale());

@@ -1,0 +1,21 @@
+<?php
+return [
+    'expiring_contracts_report' => 'Expiring Contracts Report',
+    'search_filter' => 'Search & Filter',
+    'tenant' => 'Tenant',
+    'all_tenants' => '--- All Tenants ---',
+    'expires_within' => 'Expires Within',
+    'period_type' => 'Period Type',
+    'days' => 'Days',
+    'months' => 'Months',
+    'print_report' => 'Print Report',
+    'contract_number' => 'Contract No.',
+    'unit' => 'Unit',
+    'start_date' => 'Start Date',
+    'end_date' => 'End Date',
+    'total_amount' => 'Total Contract Amount',
+    'whatsapp_reminder' => 'Send WhatsApp Reminder',
+    'no_phone' => 'No Phone Number',
+    'no_expiring_contracts' => 'No expiring contracts found within the selected period',
+    'placeholder_period' => 'Ex: 30 or 2',
+];

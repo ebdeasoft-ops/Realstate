@@ -1,0 +1,23 @@
+<?php
+return [
+    'expiring_contracts_report' => 'تقرير العقود وشيكة الانتهاء',
+    'search_filter' => 'بحث وتصفية',
+    'tenant' => 'المستأجر',
+    'all_tenants' => '--- كل المستأجرين ---',
+    'expires_within' => 'تنتهي خلال (مدة)',
+    'period_type' => 'نوع المدة',
+    'days' => 'أيام',
+    'months' => 'شهور',
+    'print_report' => 'طباعة التقرير',
+    'contract_number' => 'رقم العقد',
+    'unit' => 'الوحدة',
+    'start_date' => 'تاريخ البداية',
+    'end_date' => 'تاريخ النهاية',
+    'total_amount' => 'إجمالي قيمة العقد',
+    'whatsapp_reminder' => 'إرسال تذكير (واتساب)',
+    'no_phone' => 'لا يوجد رقم هاتف',
+    'no_expiring_contracts' => 'لا توجد عقود وشيكة الانتهاء خلال الفترة المحددة',
+    'placeholder_period' => 'مثال: 30 أو 2',
+    'expired_contracts' => 'العقود المنتهية بالفعل',
+    'upcoming_contracts' => 'العقود التي ستنتهي قريباً',
+];

@@ -36,12 +36,32 @@ class PropertyController extends Controller
 
 
     // عرض جميع العقارات مع المالك والوحدات
-    public function index()
-    {
-        $properties = Property::with(['owner', 'units'])->get();
-        return view('properties.index', compact('properties'));
+public function index(Request $request)
+{
+    $query = Property::with(['owner', 'units']);
+
+    // تطبيق فلتر اسم العقار
+    if ($request->filled('property_name')) {
+        $query->where('name', $request->property_name);
     }
 
+    // تطبيق فلتر النوع (sale أو rent)
+    if ($request->filled('type')) {
+        $query->where('type', $request->type);
+    }
+
+    $properties = $query->paginate(10);
+    
+    // جلب جميع العقارات لتعبئة قائمة البحث (Select2)
+    $allProperties = Property::select('id', 'name')->get();
+
+    // التحقق إذا كان الطلب قادماً عبر AJAX لإرجاع جزء معين أو الـ View مصغراً
+    if ($request->ajax()) {
+        return view('properties.index', compact('properties', 'allProperties'))->render();
+    }
+
+    return view('properties.index', compact('properties', 'allProperties'));
+}
     // صفحة إضافة عقار جديد
     public function create()
     {
@@ -94,7 +114,6 @@ class PropertyController extends Controller
             'address' => 'nullable|string|max:255',
             'city' => 'nullable|string|max:255',
             'district' => 'nullable|string|max:255',
-
             // بيانات المالك والهوية
             'owner_id_number' => 'nullable|string|max:100',
             'owner_nationality' => 'nullable|string|max:100',

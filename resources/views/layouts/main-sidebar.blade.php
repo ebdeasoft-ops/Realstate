@@ -1,311 +1,495 @@
 <style>
-/* تحديد ارتفاع ثابت للسايد بار ومنحه سكرول منفصل */
-.app-sidebar {
+/* =====================================================================
+   EBDEA SOFT — Sidebar Design Tokens (Corporate / Trust identity)
+   Navy + Steel Blue + Slate, built for a Real Estate ERP
+   ===================================================================== */
+:root{
+    --sb-navy-950:      #0B1B33;
+    --sb-navy-900:      #102A4C;
+    --sb-navy-800:      #16375F;
+    --sb-blue-600:      #2F6FED;
+    --sb-blue-500:      #4C8DFF;
+    --sb-slate-300:     #B9C4D6;
+    --sb-slate-400:     #8CA0BD;
+    --sb-slate-500:     #6B7FA0;
+    --sb-line:          rgba(255,255,255,.08);
+    --sb-line-soft:     rgba(255,255,255,.05);
+    --sb-white:         #F5F8FC;
+    --sb-danger:        #EF5A6F;
+    --sb-radius:        10px;
+    --sb-width:         260px;
+    --sb-font:          'IBM Plex Sans Arabic','Cairo','Segoe UI',system-ui,sans-serif;
+}
+
+/* ---- shell ---------------------------------------------------------- */
+.app-sidebar,
+.app-sidebar.sidebar-scroll,
+html body .app-sidebar{
     position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    /* لأن السيستم عندك RTL */
+    top: 0; bottom: 0;
+    inset-inline-end: 0;              /* RTL/LTR aware: right in RTL, left in LTR */
+    width: var(--sb-width);
     height: 100vh !important;
     overflow-y: auto !important;
-    /* تفعيل السكرول الرأسي */
+    overflow-x: hidden !important;
     z-index: 1000;
+    background: linear-gradient(180deg, var(--sb-navy-950) 0%, var(--sb-navy-900) 100%) !important;
+    border-inline-start: 1px solid var(--sb-line);
+    font-family: var(--sb-font);
+    box-shadow: 0 0 40px rgba(0,0,0,.25);
 }
 
-/* تحسين شكل السكرول بار عشان ميبقاش شكله وحش */
-.app-sidebar::-webkit-scrollbar {
-    width: 5px;
+/* the base theme wraps everything in .main-sidemenu — force it transparent
+   so the gradient above always shows through, no matter what the theme's
+   own stylesheet sets on it */
+.app-sidebar .main-sidemenu,
+.app-sidebar .main-sidemenu > div{
+    background: transparent !important;
 }
 
-.app-sidebar::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 10px;
+.app-sidebar::-webkit-scrollbar{ width: 5px; }
+.app-sidebar::-webkit-scrollbar-thumb{ background: var(--sb-navy-800); border-radius: 10px; }
+.app-sidebar::-webkit-scrollbar-track{ background: transparent; }
+
+.app-sidebar .slide.is-expanded > .slide-menu{ display: block !important; }
+
+/* ---- header / brand -------------------------------------------------- */
+.app-sidebar .main-sidebar-header{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 68px;
+    border-bottom: 1px solid var(--sb-line);
+    background: var(--sb-navy-950) !important;
+}
+.app-sidebar .main-sidebar-header .main-logo{ max-height: 36px; }
+.app-sidebar .main-sidebar-header .logo-icon{ max-height: 30px; }
+
+/* ---- user card --------------------------------------------------------*/
+.app-sidebar .app-sidebar__user{
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--sb-line);
+    background: transparent !important;
+}
+.app-sidebar .app-sidebar__user .dropdown,
+.app-sidebar .app-sidebar__user .user-pro-body{
+    background: transparent !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.app-sidebar .app-sidebar__user .avatar{
+    width: 44px; height: 44px;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid var(--sb-blue-600);
+}
+.app-sidebar .app-sidebar__user .user-info{ background: transparent !important; }
+.app-sidebar .app-sidebar__user .user-info h4{
+    color: var(--sb-white) !important;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+}
+.app-sidebar .app-sidebar__user .user-info span{
+    color: var(--sb-slate-400) !important;
+    font-size: 12px;
 }
 
-/* كلاسات لضمان ثبات القائمة وعرضها فوراً عند التحميل */
-.app-sidebar .slide.is-expanded>.slide-menu {
-    display: block !important;
+/* language switch pill inside the user card */
+.app-sidebar .sb-lang-switch{
+    display: flex !important;
+    width: 100% !important;
+    margin-top: 12px !important;
+    background: var(--sb-navy-800) !important;
+    border-radius: 999px !important;
+    padding: 3px !important;
+    gap: 3px !important;
+}
+.app-sidebar .sb-lang-switch a{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 1 0% !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 6px 4px !important;
+    border-radius: 999px !important;
+    color: var(--sb-slate-300) !important;
+    text-decoration: none !important;
+    transition: background .15s ease, color .15s ease;
+}
+.app-sidebar .sb-lang-switch a.active{
+    background: var(--sb-blue-600) !important;
+    color: #fff !important;
+}
+
+/* ---- menu ------------------------------------------------------------ */
+.app-sidebar .side-menu,
+.app-sidebar ul.side-menu{ list-style: none; margin: 0; padding: 10px 12px 24px; background: transparent !important; }
+
+.app-sidebar .side-menu__item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    margin: 2px 0;
+    border-radius: var(--sb-radius);
+    color: var(--sb-slate-300) !important;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent !important;
+    transition: background .15s ease, color .15s ease;
+}
+.side-menu__item:hover{
+    background: var(--sb-line-soft);
+    color: var(--sb-white);
+}
+.side-menu__icon{
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    color: var(--sb-slate-400);
+    fill: currentColor;
+    transition: color .15s ease;
+}
+.side-menu__item:hover .side-menu__icon{ color: var(--sb-blue-500); }
+
+.side-menu__label{ flex: 1; }
+
+.angle{
+    font-size: 11px;
+    color: var(--sb-slate-500);
+    transition: transform .2s ease;
+}
+.slide.is-expanded > .side-menu__item .angle{ transform: rotate(180deg); }
+
+/* active state (server should add .active on current route's <li class="slide">) */
+.slide.active > .side-menu__item,
+.slide-item.active{
+    background: var(--sb-blue-600);
+    color: var(--sb-white) !important;
+}
+.slide.active > .side-menu__item .side-menu__icon{ color: var(--sb-white); }
+
+/* section eyebrow labels — encode grouping, not decoration */
+.side-menu__eyebrow{
+    padding: 16px 14px 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--sb-slate-500);
+}
+.side-menu__eyebrow:first-child{ padding-top: 6px; }
+
+/* sub menu */
+.slide-menu{
+    list-style: none;
+    margin: 2px 0 6px;
+    padding-inline-start: 14px;
+    border-inline-start: 1px solid var(--sb-line);
+    margin-inline-start: 24px;
+}
+.slide-menu .slide-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--sb-slate-400);
+    text-decoration: none;
+    transition: background .15s ease, color .15s ease;
+}
+.slide-menu .slide-item:hover{
+    background: var(--sb-line-soft);
+    color: var(--sb-white);
+}
+.slide-menu .slide-item i,
+.slide-menu .slide-item svg{
+    width: 15px;
+    font-size: 13px;
+    color: var(--sb-slate-500);
+}
+
+/* nested (level-2) sub menu, e.g. reports groups */
+.sub-side-menu__item{
+    display: flex;
+    align-items: center;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sb-slate-300);
+    text-decoration: none;
+    cursor: pointer;
+}
+.sub-side-menu__label{ flex: 1; }
+.slide-menu .slide-menu{ margin-inline-start: 12px; }
+
+/* logout — visually distinct, always at reach */
+.side-menu__item.sb-logout{ color: var(--sb-danger); }
+.side-menu__item.sb-logout .side-menu__icon{ color: var(--sb-danger); }
+.side-menu__item.sb-logout:hover{ background: rgba(239,90,111,.12); }
+
+/* divider */
+.sb-divider{
+    height: 1px;
+    background: var(--sb-line);
+    margin: 10px 14px;
+}
+
+@media (max-width: 991px){
+    .app-sidebar{ transform: translateX(100%); transition: transform .25s ease; }
+    [dir="ltr"] .app-sidebar{ transform: translateX(-100%); }
+    .app-sidebar.sidebar-open{ transform: translateX(0); }
 }
 </style>
-
 
 <!-- main-sidebar -->
 <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
 <aside class="app-sidebar sidebar-scroll">
 
     <div class="main-sidebar-header active">
-        <a class="desktop-logo logo-light active" href="https://ebdeasoft.com/"><img
-                src="{{ URL::asset('assets/img/brand/logo.png') }}" class="main-logo" alt="logo"></a>
-        <a class="desktop-logo logo-dark active" href="https://ebdeasoft.com/"><img
-                src="{{ URL::asset('assets/img/brand/logo-white.png') }}"'product_sales' class="main-logo dark-theme"
-                alt="logo"></a>
-        <a class="logo-icon mobile-logo icon-light active" href="https://ebdeasoft.com/"><img
-                src="{{ URL::asset('assets/img/brand/favicon.png') }}" class="logo-icon" alt="logo"></a>
-        <a class="logo-icon mobile-logo icon-dark active" href="https://ebdeasoft.com/"><img
-                src="{{ URL::asset('assets/img/brand/favicon-white.png') }}" class="logo-icon dark-theme"
-                alt="logo"></a>
+        <a class="desktop-logo logo-light active" href="https://ebdeasoft.com/">
+            <img src="{{ URL::asset('assets/img/brand/logo.png') }}" class="main-logo" alt="{{ config('app.name') }}">
+        </a>
+        <a class="desktop-logo logo-dark active" href="https://ebdeasoft.com/">
+            <img src="{{ URL::asset('assets/img/brand/logo-white.png') }}" class="main-logo dark-theme" alt="{{ config('app.name') }}">
+        </a>
+        <a class="logo-icon mobile-logo icon-light active" href="https://ebdeasoft.com/">
+            <img src="{{ URL::asset('assets/img/brand/favicon.png') }}" class="logo-icon" alt="{{ config('app.name') }}">
+        </a>
+        <a class="logo-icon mobile-logo icon-dark active" href="https://ebdeasoft.com/">
+            <img src="{{ URL::asset('assets/img/brand/favicon-white.png') }}" class="logo-icon dark-theme" alt="{{ config('app.name') }}">
+        </a>
     </div>
+
     <div class="main-sidemenu">
 
-
+        {{-- ============== USER CARD + LANGUAGE SWITCH ============== --}}
         <div class="app-sidebar__user clearfix">
             <div class="dropdown user-pro-body">
-                <div class="">
-                    <img alt="user-img" class="avatar avatar-xl brround"
-                        src="{{ Auth::user()->profile_photo_path ? URL::asset('storage/' . Auth::user()->profile_photo_path) : URL::asset('assets/img/faces/6.jpg') }}"><span
-                        class="avatar-status profile-status bg-green"></span>
-                </div>
+                <img alt="user-img" class="avatar avatar-xl brround"
+                    src="{{ Auth::user()->profile_photo_path ? URL::asset('storage/' . Auth::user()->profile_photo_path) : URL::asset('assets/img/faces/6.jpg') }}">
                 <div class="user-info">
-                    <h4 class="font-weight-semibold mt-3 mb-0">{{ Auth::user()->name }}</h4>
-                    <span class="mb-0 text-muted">{{ Auth::user()->email }}</span>
+                    <h4>{{ Auth::user()->name }}</h4>
+                    <span>{{ Auth::user()->email }}</span>
                 </div>
+            </div>
+
+            {{-- Localization switch — swaps the /ar/ or /en/ prefix on the current URL,
+                 matching the existing App\Http\Middleware\SetLocale prefix-based setup.
+                 No extra named route needed. --}}
+            @php
+                $sbCurrentPath = request()->path();               // e.g. "ar/dashboard"
+                $sbSegments    = explode('/', $sbCurrentPath);
+                $sbRest        = implode('/', array_slice($sbSegments, 1)); // path without the locale segment
+            @endphp
+            <div class="sb-lang-switch">
+                <a href="{{ url('ar/' . $sbRest) }}" class="{{ app()->getLocale() === 'ar' ? 'active' : '' }}">العربية</a>
+                <a href="{{ url('en/' . $sbRest) }}" class="{{ app()->getLocale() === 'en' ? 'active' : '' }}">English</a>
             </div>
         </div>
 
-
         <ul class="side-menu">
 
+            {{-- ============== HOME ============== --}}
             @can('Home')
-            <li class="slide">
+            <li class="slide {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <a class="side-menu__item" href="{{ url('/dashboard') }}">
-                    <svg style="color: green !important;" class="side-menu__icon" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 576 512">
-                        <path
-                            d="M543.8 287.6c17 0 32-14 32-32.1c1-9-3-17-11-24L309.5 7c-6-5-14-7-21-7s-15 1-22 8L10 231.5c-7 7-10 15-10 24c0 18 14 32.1 32 32.1h32V448c0 35.3 28.7 64 64 64H230.4l-31.3-52.2c-4.1-6.8-2.6-15.5 3.5-20.5L288 368l-60.2-82.8c-10.9-15 8.2-33.5 22.8-22l117.9 92.6c8 6.3 8.2 18.4 .4 24.9L288 448l38.4 64H448.5c35.5 0 64.2-28.8 64-64.3l-.7-160.2h32z" />
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                        <path d="M543.8 287.6c17 0 32-14 32-32.1c1-9-3-17-11-24L309.5 7c-6-5-14-7-21-7s-15 1-22 8L10 231.5c-7 7-10 15-10 24c0 18 14 32.1 32 32.1h32V448c0 35.3 28.7 64 64 64H480c35.3 0 64-28.7 64-64V287.6h-.2z"/>
                     </svg>
-
                     <span class="side-menu__label">{{ __('home.home') }}</span>
                 </a>
             </li>
             @endcan
 
-            <ul class="side-menu">
-                <!-- قسم إدارة العقارات -->
-                <li class="slide">
-                    <a class="side-menu__item" data-toggle="slide" href="#">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 576 512"
-                            fill="currentColor">
-                            <path
-                                d="M575.8 255.5C575.8 273.5 561.8 287.5 543.8 287.5H511.8V448.5C511.8 483.6 483.4 512 448.4 512H96.38C61.31 512 32.38 483.6 32.38 448.5V287.5H.375C-17.62 287.5-31.62 273.5-31.62 255.5C-31.62 246.5-27.62 238.5-21.62 232.5L256.4 0L534.8 232.5C541.8 238.5 575.8 246.5 575.8 255.5zM288 88.5L96.38 248.5V448.5H160V352C160 334.3 174.3 320 192 320H384C401.7 320 416 334.3 416 352V448.5H481.6V248.5L288 88.5z" />
-                        </svg>
-                        <span class="side-menu__label">{{ __('realestate.properties') }}</span>
-                        <i class="angle fe fe-chevron-down"></i>
-                    </a>
+            {{-- ============== REAL ESTATE OPERATIONS ============== --}}
+            <div class="side-menu__eyebrow">{{ __('realestate.property_management') }}</div>
 
-                    <ul class="slide-menu">
-                        <!-- شاشة التحكم (الإضافة الجديدة) -->
-                        <li>
-                            <a class="slide-item" href="{{ route('properties.control.default') }}">
-                                <i class="bx bx-tachometer" style="margin-left: 5px; margin-right: 5px;"></i>
-                                التحكم بالعقارات
-                            </a>
-                        </li>
-                        <!-- رابط الملاك -->
-                        <li>
-                            <a class="slide-item" href="{{ route('owners.index') }}">
-                                <i class="bx bx-user" style="margin-left: 5px; margin-right: 5px;"></i>
-                                {{ __('realestate.owners') }}
-                            </a>
-                        </li>
-
-                        <!-- رابط العقارات -->
-                        <li>
-                            <a class="slide-item" href="{{ route('properties.index') }}">
-                                <i class="bx bx-building-house" style="margin-left: 5px; margin-right: 5px;"></i>
-                                {{ __('realestate.properties') }}
-                            </a>
-                        </li>
-
-                        <!-- رابط الوحدات -->
-                        <li>
-                            <a class="slide-item" href="{{ route('units.index') }}">
-                                <i class="bx bx-grid-alt" style="margin-left: 5px; margin-right: 5px;"></i>
-                                {{ __('realestate.units') }}
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-            <ul class="side-menu">
-
-                <!-- قسم المستأجرين (قائمة منسدلة) -->
-                <li class="slide">
-                    <a class="side-menu__item" data-toggle="slide" href="#">
-                        <i class="fas fa-users side-menu__icon"></i>
-                        <span class="side-menu__label">{{ __('realestate.tenants') }}</span>
-                        <i class="angle fe fe-chevron-down"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a href="{{ route('tenants.index') }}" class="slide-item">إدارة المستأجرين</a></li>
-                                <li><a href="{{ route('payments.index') }}" class="slide-item"><i
-                                    class="fa-solid fa-money-bill-wave me-1"></i> إدارة الدفعات</a></li>
-                 
-                        <!-- يمكنك إضافة عناصر جديدة هنا لاحقاً -->
-                    </ul>
-                </li>
-
-                <!-- قسم عقود الإيجار (قائمة منسدلة) -->
-                <li class="slide">
-                    <a class="side-menu__item" data-toggle="slide" href="#">
-                        <i class="fas fa-file-contract side-menu__icon"></i>
-                        <span class="side-menu__label">{{ __('realestate.contracts') }}</span>
-                        <i class="angle fe fe-chevron-down"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a href="{{ route('lease_contracts.index') }}" class="slide-item">إدارة العقود</a></li>
-                        <!-- يمكنك إضافة عناصر جديدة هنا لاحقاً -->
-                    </ul>
-                </li>
-
-            </ul>
-
-            @can('Additions')
+            @can('Properties')
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 576 512">
-                        <path
-                            d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384v38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16v48H368c-8.8 0-16 7.2-16 16s7.2 16 16 16h48v48c0 8.8 7.2 16 16 16s16-7.2 16-16V384h48c8.8 0 16-7.2 16-16s-7.2-16-16-16H448V304z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 576 512" fill="currentColor">
+                        <path d="M575.8 255.5C575.8 273.5 561.8 287.5 543.8 287.5H511.8V448.5C511.8 483.6 483.4 512 448.4 512H96.38C61.31 512 32.38 483.6 32.38 448.5V287.5H.375C-17.62 287.5-31.62 273.5-31.62 255.5C-31.62 246.5-27.62 238.5-21.62 232.5L256.4 0L534.8 232.5C541.8 238.5 575.8 246.5 575.8 255.5zM288 88.5L96.38 248.5V448.5H160V352C160 334.3 174.3 320 192 320H384C401.7 320 416 334.3 416 352V448.5H481.6V248.5L288 88.5z"/>
                     </svg>
-
-                    <span class="side-menu__label">{{ __('home.Subprocesses') }}</span>
+                    <span class="side-menu__label">{{ __('realestate.properties') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
-                    @can('Add new product')
-                    <li>
-                        <a class="slide-item" href="{{ url('/addnewProduct') }}">{{ __('supprocesses.addproduct') }}</a>
-                    </li>
+                    @can('Property Control')
+                    <li><a class="slide-item" href="{{ route('properties.control.default') }}"><i class="bx bx-tachometer"></i>{{ __('realestate.property_control') }}</a></li>
                     @endcan
-
-                    @can('Show groups')
-                    <li>
-                        <a class="slide-item" href="{{ url('/show_groups') }}">{{ __('home.groups') }}</a>
-                    </li>
+                    @can('Show properties')
+                    <li><a class="slide-item" href="{{ route('properties.index') }}"><i class="bx bx-building-house"></i>{{ __('realestate.properties') }}</a></li>
                     @endcan
-
-                    @can('Add a new customer')
-                    <li>
-                        <a class="slide-item mdi mdi-account"
-                            href="{{ url('/addnewcustomer') }}">{{ __('home.addnewcustomer') }}</a>
-                    </li>
+                    @can('Add new property')
+                    <li><a class="slide-item" href="{{ route('properties.create') }}"><i class="bx bx-plus-circle"></i>{{ __('realestate.add_property') }}</a></li>
                     @endcan
-
-                    @can('Add new supplier')
-                    <li>
-                        <a class="slide-item" href="{{ url('/addnewsupplier') }}">{{ __('home.addnewsupplier') }}</a>
-                    </li>
+                    @can('Show units')
+                    <li><a class="slide-item" href="{{ route('units.index') }}"><i class="bx bx-grid-alt"></i>{{ __('realestate.units') }}</a></li>
                     @endcan
-
-                    @can('Update customer')
-                    <li>
-                        <a class="slide-item mdi mdi-account"
-                            href="{{ url('/updatecustomer') }}">{{ __('home.updatecustome') }}</a>
-                    </li>
+                    @can('Add new unit')
+                    <li><a class="slide-item" href="{{ route('units.create') }}"><i class="bx bx-plus-circle"></i>{{ __('realestate.add_unit') }}</a></li>
                     @endcan
-
-                    @can('Update supplier')
-                    <li>
-                        <a class="slide-item" href="{{ url('/updatesupplier') }}">{{ __('home.updatesupplier') }}</a>
-                    </li>
+                    @can('Unit types')
+                    <li><a class="slide-item" href="{{ route('unit-types.index') }}"><i class="bx bx-category"></i>{{ __('unit_types.title') }}</a></li>
+                    @endcan
+                    @can('Show owners')
+                    <li><a class="slide-item" href="{{ route('owners.index') }}"><i class="bx bx-user"></i>{{ __('realestate.owners') }}</a></li>
+                    @endcan
+                    @can('Add new owner')
+                    <li><a class="slide-item" href="{{ route('owners.create') }}"><i class="bx bx-plus-circle"></i>{{ __('realestate.add_owner') }}</a></li>
                     @endcan
                 </ul>
             </li>
             @endcan
 
+            @can('Tenants Management')
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="fas fa-users side-menu__icon"></i>
+                    <span class="side-menu__label">{{ __('realestate.tenants_management') }}</span>
+                    <i class="angle fe fe-chevron-down"></i>
+                </a>
+                <ul class="slide-menu">
+                    @can('Show tenants')
+                    <li><a class="slide-item" href="{{ route('tenants.index') }}"><i class="bx bx-list-ul"></i>{{ __('realestate.tenants') }}</a></li>
+                    @endcan
+                    @can('Add new tenant')
+                    <li><a class="slide-item" href="{{ route('tenants.create') }}"><i class="bx bx-plus-circle"></i>{{ __('realestate.add_tenant') }}</a></li>
+                    @endcan
+                    @can('Payments management')
+                    <li><a class="slide-item" href="{{ route('payments.index') }}"><i class="fa-solid fa-money-bill-wave"></i>{{ __('realestate.payments_management') }}</a></li>
+                    @endcan
+                </ul>
+            </li>
+            @endcan
 
+            @can('Lease Contracts')
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="fas fa-file-contract side-menu__icon"></i>
+                    <span class="side-menu__label">{{ __('realestate.contract_management') }}</span>
+                    <i class="angle fe fe-chevron-down"></i>
+                </a>
+                <ul class="slide-menu">
+                    @can('Show lease contracts')
+                    <li><a class="slide-item" href="{{ route('lease_contracts.index') }}"><i class="bx bx-list-ul"></i>{{ __('realestate.contracts') }}</a></li>
+                    @endcan
+                    @can('Create lease contract')
+                    <li><a class="slide-item" href="{{ route('lease_contracts.create') }}"><i class="bx bx-plus-circle"></i>{{ __('realestate.create_contract') }}</a></li>
+                    @endcan
+                </ul>
+            </li>
+            @endcan
 
+            @can('Property Expenses')
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 512 512" fill="currentColor">
+                        <path d="M501.1 395.7L384 278.6c-23.1-23.1-57.6-27.6-85.4-13.9L192 158.1V96L64 0 0 64l96 128h62.1l106.6 106.6c-13.6 27.8-9.2 62.3 13.9 85.4l117.1 117.1c14.6 14.6 38.2 14.6 52.7 0l52.7-52.7c14.6-14.6 14.6-38.2 0-52.7z"/>
+                    </svg>
+                    <span class="side-menu__label">{{ __('realestate.enter_maintenance_expenses') }}</span>
+                    <i class="angle fe fe-chevron-down"></i>
+                </a>
+                <ul class="slide-menu">
+                    @can('Enter maintenance expenses')
+                    <li><a class="slide-item" href="{{ route('property_expenses.create') }}"><i class="bx bx-receipt"></i>{{ __('realestate.enter_maintenance_expenses') }}</a></li>
+                    @endcan
+                    @can('Property expense report')
+                    <li><a class="slide-item" href="{{ route('property_expenses.report') }}"><i class="bx bx-file"></i>{{ __('realestate.expense_report') }}</a></li>
+                    @endcan
+                </ul>
+            </li>
+            @endcan
 
+            {{-- ============== SALES ============== --}}
+            <div class="side-menu__eyebrow">{{ __('home.sales') }}</div>
+            @can('Sales')
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21,5c-1.11-0.35-2.33-0.5-3.5-0.5c-1.95,0-4.05,0.4-5.5,1.5c-1.45-1.1-3.55-1.5-5.5-1.5S2.45,4.9,1,6v14.65c0,0.25,0.25,0.5,0.5,0.5c0.1,0,0.15-0.05,0.25-0.05C3.1,20.45,5.05,20,6.5,20c1.95,0,4.05,0.4,5.5,1.5c1.35-0.85,3.8-1.5,5.5-1.5c1.65,0,3.35,0.3,4.75,1.05c0.1,0.05,0.15,0.05,0.25,0.05c0.25,0,0.5-0.25,0.5-0.5V6C22.4,5.55,21.75,5.25,21,5z"/>
+                    </svg>
+                    <span class="side-menu__label">{{ __('home.sales') }}</span>
+                    <i class="angle fe fe-chevron-down"></i>
+                </a>
+                <ul class="slide-menu">
+                    @can('Sales products')
+                    <li><a class="slide-item" href="{{ url('/goToSale') }}">{{ __('home.sales') }}</a></li>
+                    @endcan
+                    @can('sales return')
+                    <li><a class="slide-item" href="{{ url('/return_sale') }}">{{ __('home.salesـreturned') }}</a></li>
+                    @endcan
+                    @can('Previous sales invoices')
+                    <li><a class="slide-item" href="{{ url('/previousSalesInvoices') }}">{{ __('home.previousSalesInvoices') }}</a></li>
+                    @endcan
+                    @can('Pending sales invoices')
+                    <li><a class="slide-item" href="{{ url('/pending_invoice_previes') }}">{{ __('home.pending_invoice_previes') }}</a></li>
+                    @endcan
+                    @can('Sent sales invoices')
+                    <li><a class="slide-item" href="{{ url('/previousSales_sended_Invoices') }}">{{ __('home.previousSales_sended_Invoices') }}</a></li>
+                    @endcan
+                    @can('Not sent sales invoices')
+                    <li><a class="slide-item" href="{{ url('/previousSales_not_sended_Invoices') }}">{{ __('home.previousSales_not_sended_Invoices') }}</a></li>
+                    @endcan
+                </ul>
+            </li>
+            @endcan
 
-
+            {{-- ============== ACCOUNTING ============== --}}
+            <div class="side-menu__eyebrow">{{ __('home.accounting') }}</div>
             @can('Accounts')
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 384 512">
-                        <path
-                            d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zM96 64H288c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32zm32 160a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM96 352a32 32 0 1 1 0-64 32 32 0 1 1 0 64zM64 416c0-17.7 14.3-32 32-32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H96c-17.7 0-32-14.3-32-32zM192 256a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zm64-64a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm32 64a32 32 0 1 1 -64 0 32 32 0 1 1 64 0zM288 448a32 32 0 1 1 0-64 32 32 0 1 1 0 64z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 384 512" fill="currentColor">
+                        <path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zM96 64H288c17.7 0 32 14.3 32 32v32c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V96c0-17.7 14.3-32 32-32z"/>
                     </svg>
-
                     <span class="side-menu__label">{{ __('home.accounting') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
                     @can('Account type')
-                    <li>
-                        <a class="slide-item" href="{{ url('/account_type') }}">{{ __('home.account_type') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/account_type') }}">{{ __('home.account_type') }}</a></li>
                     @endcan
-
                     @can('enpenses_reason')
-                    <li>
-                        <a class="slide-item"
-                            href="{{ url('/expenses_reason') }}">{{ __('report.enpenses_reason') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/expenses_reason') }}">{{ __('report.enpenses_reason') }}</a></li>
                     @endcan
-
                     @can('Opening entry')
-                    <li>
-                        <a class="slide-item" href="{{ url('/Opening_entry') }}">{{ __('home.Opening_entry') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/Opening_entry') }}">{{ __('home.Opening_entry') }}</a></li>
                     @endcan
-
                     @can('Daily record')
-                    <li>
-                        <a class="slide-item" href="{{ url('/Daily_record') }}">{{ __('home.Daily_record') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/Daily_record') }}">{{ __('home.Daily_record') }}</a></li>
                     @endcan
-
                     @can('Voucher')
-                    <li>
-                        <a class="slide-item" href="{{ url('/voncher') }}">{{ __('home.voucher') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/voncher') }}">{{ __('home.voucher') }}</a></li>
                     @endcan
-
                     @can('Receipt document')
-                    <li>
-                        <a class="slide-item"
-                            href="{{ url('/reciept_decoument') }}">{{ __('home.Receipt document') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/reciept_decoument') }}">{{ __('home.Receipt document') }}</a></li>
                     @endcan
-
                     @can('Add new account')
-                    <li>
-                        <a class="slide-item" href="{{ url('/create_acount') }}">{{ __('home.add_new_account') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/create_acount') }}">{{ __('home.add_new_account') }}</a></li>
                     @endcan
-
                     @can('Account tree')
-                    <li>
-                        <a class="slide-item" href="{{ url('/tree') }}">{{ __('home.tree') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/tree') }}">{{ __('home.tree') }}</a></li>
                     @endcan
-
-
-
-
-
-
-
                     @can('Transfer to main branch')
-                    <li>
-                        <a class="slide-item"
-                            href="{{ url('/Transfertomainbranch') }}">{{ __('home.transferMainBranch') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/Transfertomainbranch') }}">{{ __('home.transferMainBranch') }}</a></li>
                     @endcan
-
                     @can('Confirm transfer of master branch')
-                    <li>
-                        <a class="slide-item"
-                            href="{{ url('/confirmTransfertomainbranch') }}">{{ __('home.confirmtransferMainBranch') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/confirmTransfertomainbranch') }}">{{ __('home.confirmtransferMainBranch') }}</a></li>
                     @endcan
                 </ul>
             </li>
             @endcan
 
-
-            {{-- ================= التقارير (الأب) ================= --}}
+            {{-- ============== REPORTS ============== --}}
+            <div class="side-menu__eyebrow">{{ __('home.reports') }}</div>
             @can('Reports')
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="javascript:void(0);">
@@ -313,199 +497,125 @@
                     <span class="side-menu__label">{{ __('home.reports') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
-                    {{-- ================= الحسابات ================= --}}
+
                     @can('Accounts Reports Section')
                     <li class="slide">
                         <a class="sub-side-menu__item" data-toggle="slide" href="javascript:void(0);">
                             <span class="sub-side-menu__label">{{ __('home.accounting') }}</span>
                             <i class="angle fe fe-chevron-down"></i>
                         </a>
-
                         <ul class="slide-menu">
                             @can('Daily transactions sheet')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('budgetsheet') }}">{{ __('home.transction_day') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('budgetsheet') }}">{{ __('home.transction_day') }}</a></li>
                             @endcan
-
                             @can('Transfer cash next day')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('TransFerCashTothenNextDay') }}">{{ __('home.Transfer cash to the next day') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('TransFerCashTothenNextDay') }}">{{ __('home.Transfer cash to the next day') }}</a></li>
                             @endcan
-
                             @can('Credit collection report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('credit_collection') }}">{{ __('report.creditcollection') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('credit_collection') }}">{{ __('report.creditcollection') }}</a></li>
                             @endcan
-
                             @can('Supplier credit payment report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('Supplier_credit_payment') }}">{{ __('report.Supplier credit payment') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('Supplier_credit_payment') }}">{{ __('report.Supplier credit payment') }}</a></li>
                             @endcan
-
                             @can('Supplier debt restructuring')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('Supplier_debt_restructuring') }}">{{ __('home.Supplier_debt_restructuring') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('Supplier_debt_restructuring') }}">{{ __('home.Supplier_debt_restructuring') }}</a></li>
                             @endcan
-
                             @can('Customer debt restructuring')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('Customer_debt_restructuring') }}">{{ __('home.Customer_debt_restructuring') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('Customer_debt_restructuring') }}">{{ __('home.Customer_debt_restructuring') }}</a></li>
                             @endcan
-
                             @can('Cost center report')
-                            <li>
-                                <a class="slide-item" href="{{ url('cost_center') }}">{{ __('home.cost_center') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('cost_center') }}">{{ __('home.cost_center') }}</a></li>
                             @endcan
-
                             @can('Account statement report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('account_statement') }}">{{ __('home.account_statement') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('account_statement') }}">{{ __('home.account_statement') }}</a></li>
                             @endcan
-
                             @can('Daily record report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('Daily_record_report') }}">{{ __('home.Daily_record') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('Daily_record_report') }}">{{ __('home.Daily_record') }}</a></li>
                             @endcan
-
                             @can('Transactions to master branch report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('transactionsToMasterBranch') }}">{{ __('home.transactionsToMasterBranch') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('transactionsToMasterBranch') }}">{{ __('home.transactionsToMasterBranch') }}</a></li>
                             @endcan
-
                             @can('Expenses report')
-                            <li>
-                                <a class="slide-item" href="{{ url('Expensesreport') }}">{{ __('report.Expenses') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('Expensesreport') }}">{{ __('report.Expenses') }}</a></li>
                             @endcan
-
                             @can('List of customers')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('/Customerlist') }}">{{ __('home.customer_supplier_account') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('/Customerlist') }}">{{ __('home.customer_supplier_account') }}</a></li>
                             @endcan
-
                             @can('VAT report')
-                            <li>
-                                <a class="slide-item" href="{{ url('VAT') }}">{{ __('report.VAT') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('VAT') }}">{{ __('report.VAT') }}</a></li>
                             @endcan
-
                             @can('Financial accounts')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('/financial_accounts') }}">{{ __('home.Financial_accounts') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('/financial_accounts') }}">{{ __('home.Financial_accounts') }}</a></li>
                             @endcan
-
+                            @can('Financial accounts')
+                            <li><a class="slide-item" href="{{ url('/general_budget') }}">{{ __('home.general_budget') }}</a></li>
+                            @endcan
+                            @can('Financial accounts')
+                            <li><a class="slide-item" href="{{ url('/Statement_of_Changes_in_Equity_Report') }}">{{ __('home.Statement_of_Changes_in_Equity_Report') }}</a></li>
+                            @endcan
+                            @can('Financial accounts')
+                            <li><a class="slide-item" href="{{ url('/cashFlowStatement') }}">{{ __('home.cashFlowStatement') }}</a></li>
+                            @endcan
                             @can('Profit and lost report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('profit_and_lost') }}">{{ __('home.profit_and_lost') }}</a>
-                            </li>
-                            @endcan
-
-                            @can('Financial accounts')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('/general_budget') }}">{{ __('home.general_budget') }}</a>
-                            </li>
-                            @endcan
-
-                            @can('Financial accounts')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('/Statement_of_Changes_in_Equity_Report') }}">{{ __('home.Statement_of_Changes_in_Equity_Report') }}</a>
-                            </li>
-                            @endcan
-
-                            @can('Financial accounts')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('/cashFlowStatement') }}">{{ __('home.cashFlowStatement') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ url('profit_and_lost') }}">{{ __('home.profit_and_lost') }}</a></li>
                             @endcan
                         </ul>
                     </li>
                     @endcan
 
-
-
-                    {{-- ================= المخزون والمنتجات ================= --}}
-                    @can('Inventory Main Section')
+                    @can('Properties Reports Section')
                     <li class="slide">
                         <a class="sub-side-menu__item" data-toggle="slide" href="javascript:void(0);">
-                            <span class="sub-side-menu__label">{{ __('home.showallproduct') }}</span>
+                            <span class="sub-side-menu__label">{{ __('realestate.properties') }}</span>
                             <i class="angle fe fe-chevron-down"></i>
                         </a>
-
                         <ul class="slide-menu">
-                            @can('Product sales purchases report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('product_sales_purchases') }}">{{ __('home.product_sales_purchases') }}</a>
-                            </li>
+                            <li><a class="slide-item" href="{{ route('property_expenses.report') }}">{{ __('realestate.expense_report') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('properties.control.default') }}">{{ __('realestate.properties') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('reports.net_revenue') }}">{{ __('realestate.net_revenue_report') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('units.index') }}">{{ __('realestate.units') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('owners.index') }}">{{ __('realestate.owners') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('report.delayed_installments') }}">{{ __('report.delayed_installments_report') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('report.expiring_contracts') }}">{{ __('contracts.expiring_contracts_report') }}</a></li>
+                            <li><a class="slide-item" href="{{ route('report.units_status') }}">{{ __('report.units_status_report') }}</a></li>
+                        </ul>
+                    </li>
+                    @endcan
+
+                    @can('Sales report')
+                    <li class="slide">
+                        <a class="sub-side-menu__item" data-toggle="slide" href="javascript:void(0);">
+                            <span class="sub-side-menu__label">{{ __('home.sales') }}</span>
+                            <i class="angle fe fe-chevron-down"></i>
+                        </a>
+                        <ul class="slide-menu">
+                            @can('Sales product by date report')
+                            <li><a class="slide-item" href="{{ url('sales_product_by_date') }}">{{ __('home.sales_product_by_date') }}</a></li>
                             @endcan
-                            @can('Low sell products report')
-                            <li>
-                                <a class="slide-item" href="{{ url('low_sell') }}">{{ __('home.low_sell') }}</a>
-                            </li>
+                            @can('Year sales report')
+                            <li><a class="slide-item" href="{{ url('year_sales_report') }}">{{ __('home.year_sales_report') }}</a></li>
                             @endcan
-                            @can('Update stock quantity report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('updatestockquentity') }}">{{ __('home.updatestockquentity') }}</a>
-                            </li>
+                            @can('History of product sales report')
+                            <li><a class="slide-item" href="{{ url('salesReport') }}">{{ __('home.Historyـofـproductـsales') }}</a></li>
                             @endcan
-                            @can('Current stock quantity report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('stockquantity') }}">{{ __('report.stockquantity') }}</a>
-                            </li>
+                            @can('Sales return report')
+                            <li><a class="slide-item" href="{{ url('report_returns_sale') }}">{{ __('report.report_returns_sale') }}</a></li>
                             @endcan
-                            @can('Stocktaking report')
-                            <li>
-                                <a class="slide-item" href="{{ url('Stocktaking') }}">{{ __('home.Stocktaking') }}</a>
-                            </li>
+                            @can('Customer purchases report')
+                            <li><a class="slide-item" href="{{ url('customerـpurchases') }}">{{ __('report.customerـpurchases') }}</a></li>
                             @endcan
-                            @can('Database backup privilege')
-                            <li>
-                                <a class="slide-item" href="{{ url('our_backup_database') }}"
-                                    target="_blank">{{ __('home.backup') }}</a>
-                            </li>
+                            @can('Purchase product to customer report')
+                            <li><a class="slide-item" href="{{ url('purchasproducttocustomer') }}">{{ __('report.purchasproducttocustomer') }}</a></li>
                             @endcan
-                            @can('Product damage reports')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('ProductsDamageReport') }}">{{ __('home.product damage') }}</a>
-                            </li>
+                            @can('Product sales report')
+                            <li><a class="slide-item" href="{{ url('product_sales') }}">{{ __('report.product_sales') }}</a></li>
                             @endcan
-                            @can('Transfer of goods report')
-                            <li>
-                                <a class="slide-item"
-                                    href="{{ url('Transfer_products') }}">{{ __('home.Transfer of goods') }}</a>
-                            </li>
+                            @can('Best selling product report')
+                            <li><a class="slide-item" href="{{ url('Best_selling_products') }}">{{ __('report.Best selling products') }}</a></li>
+                            @endcan
+                            @can('Employee sales report')
+                            <li><a class="slide-item" href="{{ url('employeeـsales') }}">{{ __('report.employeeـsales') }}</a></li>
                             @endcan
                         </ul>
                     </li>
@@ -515,269 +625,172 @@
             </li>
             @endcan
 
-
-
-            {{-- ================= الربط مع الزكاة والدخل ================= --}}
+            {{-- ============== ZAKAT LINKAGE ============== --}}
             @can('Zakat Linkage Section')
+
+            <div class="side-menu__eyebrow">{{ __('home.ZATCA_Platform') }}</div>
+
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 576 512"
-                        fill="currentColor">
-                        <path
-                            d="M248 0H208c-26.5 0-48 21.5-48 48V160c0 35.3 28.7 64 64 64H352c35.3 0 64-28.7 64-64V48c0-26.5-21.5-48-48-48H328V80c0 8.8-7.2 16-16 16H264c-8.8 0-16-7.2-16-16V0zM64 256c-35.3 0-64 28.7-64 64V448c0 35.3 28.7 64 64 64H224c35.3 0 64-28.7 64-64V320c0-35.3-28.7-64-64-64H184v80c0 8.8-7.2 16-16 16H120c-8.8 0-16-7.2-16-16V256H64zM352 512H512c35.3 0 64-28.7 64-64V320c0-35.3-28.7-64-64-64H472v80c0 8.8-7.2 16-16 16H408c-8.8 0-16-7.2-16-16V256H352c-15 0-28.8 5.1-39.7 13.8c4.9 10.4 7.7 22 7.7 34.2V464c0 12.2-2.8 23.8-7.7 34.2C323.2 506.9 337 512 352 512z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 576 512" fill="currentColor">
+                        <path d="M248 0H208c-26.5 0-48 21.5-48 48V160c0 35.3 28.7 64 64 64H352c35.3 0 64-28.7 64-64V48c0-26.5-21.5-48-48-48H328V80c0 8.8-7.2 16-16 16H264c-8.8 0-16-7.2-16-16V0z"/>
                     </svg>
                     <span class="side-menu__label">{{ __('home.Linkage_with_zakat') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
                     @can('Zakat Onboarding Privilege')
-                    <li>
-                        <a class="slide-item" href="{{ url('/onbourding') }}">
-                            <i class="bx bx-slider-alt" style="margin-left: 5px; margin-right: 5px;"></i>
-                            {{ __('home.onbourding') }}
-                        </a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/onbourding') }}"><i class="bx bx-slider-alt"></i>{{ __('home.onbourding') }}</a></li>
                     @endcan
                 </ul>
             </li>
             @endcan
 
-
-
-
-
-            {{-- ================= المستخدمين والفروع والصلاحيات ================= --}}
+            {{-- ============== ADMINISTRATION ============== --}}
             @can('User and branches')
+
+            <div class="side-menu__eyebrow">{{ __('home.users') }}</div>
+
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 640 512"
-                        fill="currentColor">
-                        <path
-                            d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0zM0 298.7C0 239.8 47.8 192 106.7 192h42.7c15.9 0 31 3.5 44.6 9.7c-1.3 7.2-1.9 14.7-1.9 22.3c0 38.2 16.8 72.5 43.3 96c-.2 0-.4 0-.7 0H21.3C9.6 320 0 310.4 0 298.7zM405.3 320c-.2 0-.4 0-.7 0c26.6-23.5 43.3-57.8 43.3-96c0-7.6-.7-15-1.9-22.3c13.6-6.3 28.7-9.7 44.6-9.7h42.7C592.2 192 640 239.8 640 298.7c0 11.8-9.6 21.3-21.3 21.3H405.3zM224 224a96 96 0 1 1 192 0 96 96 0 1 1 -192 0zM128 485.3C128 411.7 187.7 352 261.3 352H378.7C452.3 352 512 411.7 512 485.3c0 14.7-11.9 26.7-26.7 26.7H154.7c-14.7 0-26.7-11.9-26.7-26.7z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 640 512" fill="currentColor">
+                        <path d="M144 0a80 80 0 1 1 0 160A80 80 0 1 1 144 0zM512 0a80 80 0 1 1 0 160A80 80 0 1 1 512 0z"/>
                     </svg>
                     <span class="side-menu__label">{{ __('home.users') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
                     @can('add branch')
-                    <li>
-                        <a class="slide-item" href="{{ url('/showallBranchs') }}">{{ __('report.allBranches') }}</a>
-                    </li>
-                    @endcan @can('add branch')
-                    <li>
-                        <a class="slide-item" href="{{ url('/wherehouse') }}">{{ __('home.wherehouse') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/showallBranchs') }}">{{ __('report.allBranches') }}</a></li>
+                    <li><a class="slide-item" href="{{ url('/wherehouse') }}">{{ __('home.wherehouse') }}</a></li>
                     @endcan
-
                     @can('List of users')
-                    <li>
-                        <a class="slide-item" href="{{ url('/users') }}">{{ __('users.usersList') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/users') }}">{{ __('users.usersList') }}</a></li>
                     @endcan
-
                     @can('Users permissions')
-                    <li>
-                        <a class="slide-item" href="{{ url('/roles') }}">{{ __('users.Userـpermissions') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/roles') }}">{{ __('users.Userـpermissions') }}</a></li>
                     @endcan
                 </ul>
             </li>
             @endcan
 
-
-
-
-            {{-- ================= الموارد البشرية (HR) ================= --}}
             @can('Human Resource')
+
+            <div class="side-menu__eyebrow">{{ __('home.Human Resource Management') }}</div>
+
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 640 512"
-                        fill="currentColor">
-                        <path
-                            d="M335.5 4l288 160c15.4 8.6 21 28.1 12.4 43.5s-28.1 21-43.5 12.4L320 68.6 47.5 220c-15.4 8.6-34.9 3-43.5-12.4s-3-34.9 12.4-43.5L304.5 4c9.7-5.4 21.4-5.4 31.1 0zM320 160a40 40 0 1 1 0 80 40 40 0 1 1 0-80zm144 256a40 40 0 1 1 0 80 40 40 0 1 1 0-80zm312 40a40 40 0 1 1 80 0 40 40 0 1 1 -80 0zM226.9 491.4L200 441.5V480c0 17.7-14.3 32-32 32H120c-17.7 0-32-14.3-32-32V441.5L61.1 491.4c-6.3 11.7-20.8 16-32.5 9.8s-16-20.8-9.8-32.5l37.9-70.3c15.3-28.5 45.1-46.3 77.5-46.3h19.5c16.3 0 31.9 4.5 45.4 12.6l33.6-62.3c15.3-28.5 45.1-46.3 77.5-46.3h19.5c32.4 0 62.1 17.8 77.5 46.3l33.6 62.3c13.5-8.1 29.1-12.6 45.4-12.6h19.5c32.4 0 62.1 17.8 77.5 46.3l37.9 70.3c6.3 11.7 1.9 26.2-9.8 32.5s-26.2 1.9-32.5-9.8L552 441.5V480c0 17.7-14.3 32-32 32H472c-17.7 0-32-14.3-32-32V441.5l-26.9 49.9c-6.3 11.7-20.8 16-32.5 9.8s-16-20.8-9.8-32.5l36.3-67.5c-1.7-1.7-3.2-3.6-4.3-5.8L376 345.5V400c0 17.7-14.3 32-32 32H296c-17.7 0-32-14.3-32-32V345.5l-26.9 49.9c-1.2 2.2-2.6 4.1-4.3 5.8l36.3 67.5c6.3 11.7 1.9 26.2-9.8 32.5s-26.2 1.9-32.5-9.8z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 640 512" fill="currentColor">
+                        <path d="M335.5 4l288 160c15.4 8.6 21 28.1 12.4 43.5s-28.1 21-43.5 12.4L320 68.6 47.5 220c-15.4 8.6-34.9 3-43.5-12.4s-3-34.9 12.4-43.5L304.5 4c9.7-5.4 21.4-5.4 31.1 0z"/>
                     </svg>
                     <span class="side-menu__label">{{ __('home.Human Resource Management') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
                     @can('Contracts')
-                    <li>
-                        <a class="slide-item" href="{{ route('contracts.index') }}">
-                            {{ __('hr.contracts_management') }}
-                        </a>
-                    </li>
+                    <li><a class="slide-item" href="{{ route('contracts.index') }}">{{ __('hr.contracts_management') }}</a></li>
                     @endcan
-
-
-                    {{-- صفحة إعدادات الموارد البشرية الجديدة --}}
-                    @can('Human Resource')
-                    <li>
-                        <a class="slide-item" href="{{ route('hr-settings.index') }}">{{ __('hr.hr_settings') }}</a>
-                    </li>
-                    @endcan
-
+                    <li><a class="slide-item" href="{{ route('hr-settings.index') }}">{{ __('hr.hr_settings') }}</a></li>
                     @can('Employee')
-                    <li>
-                        <a class="slide-item" href="{{ url('/allEmployees') }}">{{ __('hr.show_employees') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/allEmployees') }}">{{ __('hr.show_employees') }}</a></li>
                     @endcan
-
                     @can('Add new employee')
-                    <li>
-                        <a class="slide-item" href="{{ url('/createNewEmployee') }}">{{ __('hr.add_new_employee') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/createNewEmployee') }}">{{ __('hr.add_new_employee') }}</a></li>
                     @endcan
-
                     @can('create a department')
-                    <li>
-                        <a class="slide-item" href="{{ url('/addnewDepartment') }}">{{ __('hr.createdepartment') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/addnewDepartment') }}">{{ __('hr.createdepartment') }}</a></li>
                     @endcan
-
                     @can('Increase or deduction')
-                    <li>
-                        <a class="slide-item"
-                            href="{{ url('/Increaseـor_deduction') }}">{{ __('hr.Increaseـor deductionـforـtheـemployee') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/Increaseـor_deduction') }}">{{ __('hr.Increaseـor deductionـforـtheـemployee') }}</a></li>
                     @endcan
-
                     @can('Employee loans privilege')
-                    <li>
-                        <a class="slide-item" href="{{ url('/Loans') }}">{{ __('home.Loans') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/Loans') }}">{{ __('home.Loans') }}</a></li>
                     @endcan
-
                     @can('Salary document')
-                    <li>
-                        <a class="slide-item" href="{{ url('/salarydecoument') }}">{{ __('hr.salarydecoument') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/salarydecoument') }}">{{ __('hr.salarydecoument') }}</a></li>
                     @endcan
-
                     @can('Attendances')
-                    <li>
-                        <a class="slide-item" href="{{ url('/attendances') }}">{{ __('hr.attendances_log') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/attendances') }}">{{ __('hr.attendances_log') }}</a></li>
                     @endcan
-
                     @can('Leaves')
-                    <li>
-                        <a class="slide-item" href="{{ url('/leaves') }}">{{ __('hr.employee_leaves') }}</a>
-                    </li>
-                    {{-- تقرير رصيد الإجازات المتبقي --}}
-                    <li>
-                        <a class="slide-item"
-                            href="{{ route('leaves.balance_report') }}">{{ __('leaves.balance_report_title') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/leaves') }}">{{ __('hr.employee_leaves') }}</a></li>
+                    <li><a class="slide-item" href="{{ route('leaves.balance_report') }}">{{ __('leaves.balance_report_title') }}</a></li>
                     @endcan
-                    {{-- رابط حساب نهاية الخدمة --}}
                     @can('End of Service')
-                    <li>
-                        <a class="slide-item" href="{{ route('eos.index') }}">{{ __('hr.eos_title') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ route('eos.index') }}">{{ __('hr.eos_title') }}</a></li>
                     @endcan
-
-                    {{-- رابط العهد والأصول (مستقبلي) --}}
                     @can('Custody and Assets')
-                    <li>
-                        <a class="slide-item"
-                            href="{{ route('custodies.index') }}">{{ __('hr.custody_and_assets') }}</a>
-                    </li>
+                    <li><a class="slide-item" href="{{ route('custodies.index') }}">{{ __('hr.custody_and_assets') }}</a></li>
                     @endcan
                 </ul>
             </li>
             @endcan
 
-
-            {{-- ================= الإعدادات العامة ================= --}}
             @can('Settings Section')
+
+            <div class="side-menu__eyebrow">{{ __('home.setting') }}</div>
+
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 640 512"
-                        fill="currentColor">
-                        <path
-                            d="M308.5 135.3c7.1-6.3 9.9-16.2 6.2-25c-2.3-5.3-4.8-10.5-7.6-15.5L304 89.4c-3-5-6.3-9.9-9.8-14.6c-5.7-7.6-15.7-10.1-24.7-7.1l-28.2 9.3c-10.7-8.8-23-16-36.2-20.9L199 27.1c-1.9-9.3-9.1-16.7-18.5-17.8C173.9 8.4 167.2 8 160.4 8h-.7c-6.8 0-13.5 .4-20.1 1.2c-9.4 1.1-16.6 8.6-18.5 17.8L115 56.1c-13.3 5-25.5 12.1-36.2 20.9L50.5 67.8c-9-3-19-.5-24.7 7.1c-3.5 4.7-6.8 9.6-9.9 14.6l-3 5.3c-2.8 5-5.3 10.2-7.6 15.6c-3.7 8.7-.9 18.6 6.2 25l22.2 19.8C32.6 161.9 32 168.9 32 176s.6 14.1 1.7 20.9L11.5 216.7c-7.1 6.3-9.9 16.2-6.2 25c2.3 5.3 4.8 10.5 7.6 15.6l3 5.2c3 5.1 6.3 9.9 9.9 14.6c5.7 7.6 15.7 10.1 24.7 7.1l28.2-9.3c10.7 8.8 23 16 36.2 20.9l6.1 29.1c1.9 9.3 9.1 16.7 18.5 17.8c6.7 .8 13.5 1.2 20.4 1.2s13.7-.4 20.4-1.2c9.4-1.1 16.6-8.6 18.5-17.8l6.1-29.1c13.3-5 25.5-12.1 36.2-20.9l28.2 9.3c9 3 19 .5 24.7-7.1c3.5-4.7 6.8-9.5 9.8-14.6l3.1-5.4c2.8-5 5.3-10.2 7.6-15.5c3.7-8.7 .9-18.6-6.2-25l-22.2-19.8c1.1-6.8 1.7-13.8 1.7-20.9s-.6-14.1-1.7-20.9l22.2-19.8zM112 176a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM504.7 500.5c6.3 7.1 16.2 9.9 25 6.2c5.3-2.3 10.5-4.8 15.5-7.6l5.4-3.1c5-3 9.9-6.3 14.6-9.8c7.6-5.7 10.1-15.7 7.1-24.7l-9.3-28.2c8.8-10.7 16-23 20.9-36.2l29.1-6.1c9.3-1.9 16.7-9.1 17.8-18.5c.8-6.7 1.2-13.5 1.2-20.4s-.4-13.7-1.2-20.4c-1.1-9.4-8.6-16.6-17.8-18.5L583.9 307c-5-13.3-12.1-25.5-20.9-36.2l9.3-28.2c3-9 .5-19-7.1-24.7c-4.7-3.5-9.6-6.8-14.6-9.9l-5.3-3c-5-2.8-10.2-5.3-15.6-7.6c-8.7-3.7-18.6-.9-25 6.2l-19.8 22.2c-6.8-1.1-13.8-1.7-20.9-1.7s-14.1 .6-20.9 1.7l-19.8-22.2c-6.3-7.1-16.2-9.9-25-6.2c-5.3 2.3-10.5 4.8-15.6 7.6l-5.2 3c-5.1 3-9.9 6.3-14.6 9.9c-7.6 5.7-10.1 15.7-7.1 24.7l9.3 28.2c-8.8 10.7-16 23-20.9 36.2L315.1 313c-9.3 1.9-16.7 9.1-17.8 18.5c-.8 6.7-1.2 13.5-1.2 20.4s.4 13.7 1.2 20.4c1.1 9.4 8.6 16.6 17.8 18.5l29.1 6.1c5 13.3 12.1 25.5 20.9 36.2l-9.3 28.2c-3 9-.5 19 7.1 24.7c4.7 3.5 9.5 6.8 14.6 9.8l5.4 3.1c5 2.8 10.2 5.3 15.5 7.6c8.7 3.7 18.6 .9 25-6.2l19.8-22.2c6.8 1.1 13.8 1.7 20.9 1.7s14.1-.6 20.9-1.7l19.8 22.2zM464 304a48 48 0 1 1 0 96 48 48 0 1 1 0-96z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 640 512" fill="currentColor">
+                        <path d="M308.5 135.3c7.1-6.3 9.9-16.2 6.2-25c-2.3-5.3-4.8-10.5-7.6-15.5L304 89.4c-3-5-6.3-9.9-9.8-14.6c-5.7-7.6-15.7-10.1-24.7-7.1l-28.2 9.3c-10.7-8.8-23-16-36.2-20.9L199 27.1c-1.9-9.3-9.1-16.7-18.5-17.8C173.9 8.4 167.2 8 160.4 8h-.7c-6.8 0-13.5 .4-20.1 1.2z"/>
                     </svg>
                     <span class="side-menu__label">{{ __('home.setting') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
-                    {{-- الملف الشخصي متاح دائماً لكل مستخدم مسجل دخول --}}
-                    <li>
-                        <a class="slide-item" href="{{ url('/profile') }}">
-                            <i class="bx bx-slider-alt" style="margin-left: 5px; margin-right: 5px;"></i>
-                            {{ __('auth.setting') }}
-                        </a>
-                    </li>
-
+                    <li><a class="slide-item" href="{{ url('/profile') }}"><i class="bx bx-slider-alt"></i>{{ __('auth.setting') }}</a></li>
                     @can('AVT Control')
-                    <li>
-                        <a class="slide-item" href="{{ url('/avt') }}">
-                            <i class="bx bx-slider-alt" style="margin-left: 5px; margin-right: 5px;"></i>
-                            {{ __('home.AVTSHOW') }}
-                        </a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/avt') }}"><i class="bx bx-slider-alt"></i>{{ __('home.AVTSHOW') }}</a></li>
                     @endcan
-
                     @can('System setting')
-                    <li>
-                        <a class="slide-item" href="{{ url('/systemSetting') }}">
-                            <i class="bx bx-slider-alt" style="margin-left: 5px; margin-right: 5px;"></i>
-                            {{ __('home.systemSetting') }}
-                        </a>
-                    </li>
+                    <li><a class="slide-item" href="{{ url('/systemSetting') }}"><i class="bx bx-slider-alt"></i>{{ __('home.systemSetting') }}</a></li>
                     @endcan
                 </ul>
             </li>
             @endcan
 
-            {{-- ================= زر تسجيل الخروج المستقل ================= --}}
-            <li class="slide">
-                <a class="side-menu__item" href="{{ route('logout') }}"
-                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="bx bx-log-out side-menu__icon"></i>
-                    <span class="side-menu__label">{{ __('home.logout') }}</span>
-                </a>
-            </li>
-
-
-
-            {{-- ================= التواصل والدعم الفني ================= --}}
+            {{-- ============== SUPPORT ============== --}}
             @can('Technical support')
             <li class="slide">
                 <a class="side-menu__item" data-toggle="slide" href="#">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 512 512"
-                        fill="currentColor">
-                        <path
-                            d="M256 48C141.1 48 48 141.1 48 256v40c0 13.3-10.7 24-24 24s-24-10.7-24-24V256C0 114.6 114.6 0 256 0S512 114.6 512 256V400.1c0 48.6-39.4 88-88.1 88L313.6 488c-8.3 14.3-23.8 24-41.6 24H240c-26.5 0-48-21.5-48-48s21.5-48 48-48h32c17.8 0 33.3 9.7 41.6 24l110.4 .1c22.1 0 40-17.9 40-40V256c0-114.9-93.1-208-208-208zM144 208h16c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H144c-35.3 0-64-28.7-64-64V272c0-35.3 28.7-64 64-64zm224 0c35.3 0 64 28.7 64 64v48c0 35.3-28.7 64-64 64H352c-17.7 0-32-14.3-32-32V240c0-17.7 14.3-32 32-32h16z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" viewBox="0 0 512 512" fill="currentColor">
+                        <path d="M256 48C141.1 48 48 141.1 48 256v40c0 13.3-10.7 24-24 24s-24-10.7-24-24V256C0 114.6 114.6 0 256 0S512 114.6 512 256V400.1c0 48.6-39.4 88-88.1 88L313.6 488c-8.3 14.3-23.8 24-41.6 24H240c-26.5 0-48-21.5-48-48s21.5-48 48-48h32c17.8 0 33.3 9.7 41.6 24l110.4 .1c22.1 0 40-17.9 40-40V256c0-114.9-93.1-208-208-208z"/>
                     </svg>
                     <span class="side-menu__label">{{ __('home.For communication and technical support') }}</span>
                     <i class="angle fe fe-chevron-down"></i>
                 </a>
-
                 <ul class="slide-menu">
                     <li>
                         <a class="slide-item" href="https://ebdeasoft.com/" target="_blank" rel="noopener noreferrer">
-                            <i class="fas fa-globe ml-2" style="font-size: 11px; opacity: 0.8;"></i>
-                            {{ __('home.connectwithebdeasoft') }}
+                            <i class="fas fa-globe"></i>{{ __('home.connectwithebdeasoft') }}
                         </a>
                     </li>
-
                     <li>
-                        <a class="slide-item"
-                            href="https://api.whatsapp.com/send/?phone=966534544615&text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85+%D8%B9%D9%84%D9%8A%D9%83%D9%85+...+%D8%A3%D8%B1%D8%BA%D8%A8+%D8%A8%D8%AE%D8%AF%D9%85%D8%A9+%D8%AA%D8%B3%D9%88%D9%8A%D9%82+%D8%A7%D9%84%D9%86%D8%B4%D8%A7%D8%B7+%D8%A7%D9%84%D8%AA%D8%AC%D8%A7%D8%B1%D9%8A"
-                            target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-whatsapp ml-2 text-success" style="font-size: 13px;"></i>
-                            {{ __('home.whatsappcontact') }}
+                        <a class="slide-item" target="_blank" rel="noopener noreferrer"
+                           href="https://api.whatsapp.com/send/?phone=966534544615&text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85+%D8%B9%D9%84%D9%8A%D9%83%D9%85+...+%D8%A3%D8%B1%D8%BA%D8%A8+%D8%A8%D8%AE%D8%AF%D9%85%D8%A9+%D8%AA%D8%B3%D9%88%D9%8A%D9%82+%D8%A7%D9%84%D9%86%D8%B4%D8%A7%D8%B7+%D8%A7%D9%84%D8%AA%D8%AC%D8%A7%D8%B1%D9%8A">
+                            <i class="fab fa-whatsapp" style="color:#25D366;"></i>{{ __('home.whatsappcontact') }}
                         </a>
                     </li>
                 </ul>
             </li>
             @endcan
+
+            <div class="sb-divider"></div>
+
+            {{-- ============== LOGOUT ============== --}}
+            <li class="slide">
+                <a class="side-menu__item sb-logout" href="{{ route('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <i class="bx bx-log-out side-menu__icon"></i>
+                    <span class="side-menu__label">{{ __('home.logout') }}</span>
+                </a>
+            </li>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
+
         </ul>
     </div>
 </aside>
-<!-- main-sidebar -->
+<!-- /main-sidebar -->

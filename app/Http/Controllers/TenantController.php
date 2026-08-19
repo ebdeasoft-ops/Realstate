@@ -11,11 +11,30 @@ use App\Models\customers;
 
 class TenantController extends Controller
 {
-    public function index()
-    {
-        $tenants = Tenant::all();
-        return view('tenants.index', compact('tenants'));
+public function index(Request $request)
+{
+    // جلب كل المستأجرين لملء قائمة الـ Select الخاصة بالبحث
+    $allTenants = Tenant::all();
+
+    // بناء الاستعلام للجدول مع التقسيم (Paginate)
+    $query = Tenant::query();
+
+    // البحث عن طريق الـ Select (اختيار اسم مستأجر محدد من القائمة)
+    if ($request->filled('tenant_id')) {
+        $query->where('id', $request->tenant_id);
     }
+
+    // البحث برقم الهوية (إذا تم إدخاله في خانة النص)
+    if ($request->filled('search_id')) {
+        $query->where('id_number', 'like', '%' . $request->search_id . '%');
+    }
+
+    // جلب النتائج مع التقسيم (مثلاً 10 مستأجرين في كل صفحة) مع الاحتفاظ بمعايير البحث في روابط الصفحات
+    $tenants = $query->paginate(10)->appends($request->query());
+
+    return view('tenants.index', compact('tenants', 'allTenants'));
+}
+
 
     public function create()
     {
@@ -39,7 +58,7 @@ class TenantController extends Controller
 
         DB::transaction(function () use ($request, $id) {
             $tenant = customers::findOrFail($id);
-            
+
             // 1. تحديث بيانات المستأجر بالأسماء الصحيحة المطابقة لقاعدة البيانات
             $tenant->update([
                 'name' => $request->name,
@@ -49,7 +68,7 @@ class TenantController extends Controller
                 'grace_period_in_days' => $request->grace_period_in_days ?? 30,
                 'tax_no' => $request->tax_no ?? 0,
                 'Limit_credit' => $request->Limit_credit ?? 10000,
-                'address' => $request->address, 
+                'address' => $request->address,
                 'sub_city' => $request->sub_city,
                 'street_name' => $request->street_name,
                 'plot_identification' => $request->plot_identification,
@@ -91,28 +110,28 @@ class TenantController extends Controller
 
         DB::transaction(function () use ($request) {
             // 1. إنشاء المستأجر الجديد
-          $tenant = customers::create([
-    'name' => $request->name,
-    'phone' => $request->phone,
-    'email' => $request->email,
-    'Balance' => $request->Balance ?? 0,
-    'grace_period_in_days' => $request->grace_period_in_days ?? 30,
-    'tax_no' => $request->tax_no ?? 0,
-    'CRN' => $request->CRN ?? 0,
-    'Limit_credit' => $request->Limit_credit ?? 10000,
-    
-    // إذا كان الحقل فارغاً سيتم وضع نقطة (.) مكانه
-    'address' => !empty($request->city) ? $request->city : '.',
-    'sub_city' => !empty($request->sub_city) ? $request->sub_city : '.',
-    'street_name' => !empty($request->street_name) ? $request->street_name : '.',
-    'plot_identification' => !empty($request->plot_identification) ? $request->plot_identification : '.',
-    'building_number' => !empty($request->building_number) ? $request->building_number : '.',
-    'postcode' => !empty($request->postcode) ? $request->postcode : '.',
-    'notes' => !empty($request->notes) ? $request->notes : '.',
-    
-    'id_number' => !empty($request->id_number) ? $request->id_number : '.',       // رقم الهوية إن وجد وإلا نقطة
-    'nationality' => !empty($request->nationality) ? $request->nationality : '.', // الجنسية إن وجدت وإلا نقطة
-]);
+            $tenant = customers::create([
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'Balance' => $request->Balance ?? 0,
+                'grace_period_in_days' => $request->grace_period_in_days ?? 30,
+                'tax_no' => $request->tax_no ?? 0,
+                'CRN' => $request->CRN ?? 0,
+                'Limit_credit' => $request->Limit_credit ?? 10000,
+
+                // إذا كان الحقل فارغاً سيتم وضع نقطة (.) مكانه
+                'address' => !empty($request->city) ? $request->city : '.',
+                'sub_city' => !empty($request->sub_city) ? $request->sub_city : '.',
+                'street_name' => !empty($request->street_name) ? $request->street_name : '.',
+                'plot_identification' => !empty($request->plot_identification) ? $request->plot_identification : '.',
+                'building_number' => !empty($request->building_number) ? $request->building_number : '.',
+                'postcode' => !empty($request->postcode) ? $request->postcode : '.',
+                'notes' => !empty($request->notes) ? $request->notes : '.',
+
+                'id_number' => !empty($request->id_number) ? $request->id_number : '.',       // رقم الهوية إن وجد وإلا نقطة
+                'nationality' => !empty($request->nationality) ? $request->nationality : '.', // الجنسية إن وجدت وإلا نقطة
+            ]);
 
 
 

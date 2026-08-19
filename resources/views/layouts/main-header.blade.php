@@ -20,33 +20,7 @@
          <div class="d-none d-xl-flex align-items-center">
             <ul class="nav header-shortcut-nav mb-0" style="display: flex; gap: 15px; list-style: none; padding: 0; align-items: center;">
 
-                @can('Sales products')
-                <li class="nav-item">
-                    <a class="nav-link px-2 py-1 d-flex align-items-center" href="{{ url('/goToSale') }}" style="font-size: 1.1rem; font-weight: 600;">
-                        <i class="fas fa-cash-register me-2 ms-2 text-primary"></i>
-                        <span>{{ __('home.sales') }}</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('sales return')
-                <li class="nav-item">
-                    <a class="nav-link px-2 py-1 d-flex align-items-center" href="{{ url('/return_sale') }}" style="font-size: 1.1rem; font-weight: 600;">
-                        <i class="fas fa-undo me-2 ms-2 text-danger"></i>
-                        <span>{{ __('home.salesـreturned') }}</span>
-                    </a>
-                </li>
-                @endcan
-
-                @can('Purchases products')
-                <li class="nav-item">
-                    <a class="nav-link px-2 py-1 d-flex align-items-center" href="{{ url('/purchases') }}" style="font-size: 1.1rem; font-weight: 600;">
-                        <i class="fas fa-shopping-cart me-2 ms-2 text-success"></i>
-                        <span>{{ __('home.purchases') }}</span>
-                    </a>
-                </li>
-                @endcan
-
+            
                 @can('offer price to customer')
                 <li class="nav-item">
                     <a class="nav-link px-2 py-1 d-flex align-items-center" href="{{ url('/getproductspricetocustomer') }}" style="font-size: 1.1rem; font-weight: 600;">

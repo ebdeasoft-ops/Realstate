@@ -35,8 +35,12 @@ class Unit extends Model
     {
         return $this->hasMany(UnitImage::class);
     }
-    public function activeContract()
-    {
-        return $this->hasOne(LeaseContract::class, 'unit_id')->where('status', 'active');
-    }
+public function activeContract()
+{
+    return $this->hasOne(LeaseContract::class, 'unit_id')->latest();
+}
+public function unitType()
+{
+    return $this->belongsTo(UnitType::class, 'unit_category', 'id');
+}
 }
