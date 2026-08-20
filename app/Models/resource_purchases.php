@@ -41,4 +41,8 @@ class resource_purchases extends Model
     {
         return $this->belongsTo(orderTosupllier::class, 'orderId');
     }
+  public function orderDetails()
+{
+    return $this->hasMany(orderDetails::class, 'order_owner', 'orderId');
+}
 }

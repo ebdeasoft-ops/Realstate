@@ -154,7 +154,7 @@ class ReportController extends Controller
         }
 
         if ($request->filled('status_filter')) {
-            
+
             if ($request->status_filter == 'available') {
                 $query->where('is_rented', '0');
             } elseif ($request->status_filter == 'expiring_soon') {
@@ -3072,23 +3072,27 @@ class ReportController extends Controller
         return view('reports.purchasproducttocustomer', compact('Saleing'));
     }
 
-    public function search_Refundـofـresourceـpurchases(Request $request)
-    {
-        app()->setLocale(LaravelLocalization::getCurrentLocale());
-        $branch = $request->branch;
+ public function search_Refundـofـresourceـpurchases(Request $request)
+{
+    app()->setLocale(LaravelLocalization::getCurrentLocale());
+    $branch = $request->branch;
 
-        $query = resource_purchases::where('recoveredـpieces', '!=', 0)
-            ->whereBetween('updated_at', [$request->start_at . ' 00:00:00', $request->end_at . ' 23:59:59']);
+    $query = resource_purchases::whereHas('orderDetails', function ($q) use ($request) {
+            $q->where('returns_purchase', '!=', 0)
+              ->where('updated_at', '>=', $request->start_at." "."00:00:00")
+    ->where('updated_at', '<=', $request->end_at." "."23:59:59");
+        });
+        
 
-        if ($branch != '-') {
-            $query->where('branchs_id', $branch);
-        }
-
-        $Invoices = $query->get();
-
-        return view('reports.print_Refund_of_resource_purchases', compact('Invoices'))->with('branch_id', $branch)->with('start_at', $request->start_at)->with('end_at', $request->end_at);
+    if ($branch != '-') {
+        $query->where('branchs_id', $branch);
     }
 
+    $Invoices = $query->get();
+
+    return view('reports.print_Refund_of_resource_purchases', compact('Invoices'))->with('branch_id', $branch);
+
+    }
 
 
 
