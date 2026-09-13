@@ -7,7 +7,7 @@ use App\Models\Property;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\CreditTransactions;
+use App\Models\credittransactions;
 use App\Models\financial_accounts;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -59,7 +59,7 @@ class PropertyExpenseController extends Controller
 
             // 1. تسجيل المعاملة في الصندوق أو البنك (دائن)
             if ($ownerId) {
-                CreditTransactions::create([
+                credittransactions::create([
                     'user_id'          => Auth::id(),
                     'customer_id'      => $ownerId,
                     'recive_amount'    => $request->amount,
@@ -79,7 +79,7 @@ class PropertyExpenseController extends Controller
                 $customerAccount = financial_accounts::where('orginal_type', 2)->where('orginal_id', $property->owner->id)->first();
                 
                 if ($customerAccount) {
-                    CreditTransactions::create([
+                    credittransactions::create([
                         'user_id'          => Auth::id(),
                         'customer_id'      => $customerAccount->id,
                         'recive_amount'    => $request->amount,
