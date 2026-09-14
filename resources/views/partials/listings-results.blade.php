@@ -33,7 +33,7 @@
                         </td>
                         <td>{{ $listing->city }} @if($listing->district) — {{ $listing->district }} @endif</td>
                         <?php
-$UnitType=App\Models\UnitType::find($listing->property_category);
+                      $UnitType=App\Models\UnitType::find($listing->property_category);
                         ?>
                         <td>{{ $UnitType->name_ar??$listing->property_category }}</td>
                         <td>
