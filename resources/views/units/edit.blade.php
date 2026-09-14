@@ -81,8 +81,8 @@
                             <label class="form-label"><i class="fas fa-home mr-1 text-secondary"></i> {{ __('realestate.unit_type') }}</label>
                             <select name="unit_category" class="form-control">
                                 <option value="" disabled>{{ __('realestate.choose_unit_type') }}</option>
-                                @foreach(__('realestate.unit_types_list') as $key => $value)
-                                    <option value="{{ $value }}" {{ (old('unit_category', $unit->unit_category) == $value) ? 'selected' : '' }}>{{ $value }}</option>
+                                @foreach(\App\Models\UnitType::all() as $type)
+                                    <option value="{{ $type->id }}" {{ (old('unit_category', $unit->unit_category) == $type->id) ? 'selected' : '' }}>{{ $type->name }}</option>
                                 @endforeach
                             </select>
                         </div>

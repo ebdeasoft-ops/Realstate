@@ -49,8 +49,8 @@
                             <label class="form-label">{{ __('realestate.unit_type') }} :</label>
                             <select name="property_category" class="form-control" required>
                                 <option value="" disabled>{{ __('realestate.choose_unit_type') }}</option>
-                                @foreach(__('realestate.unit_types_list') as $key => $label)
-                                    <option value="{{ $key }}" {{ old('property_category', $property->property_category) == $key ? 'selected' : '' }}>{{ $label }}</option>
+                                @foreach(\App\Models\UnitType::all() as $type)
+                                    <option value="{{ $type->id }}" {{ old('property_category', $property->property_category) == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                                 @endforeach
                             </select>
                         </div>

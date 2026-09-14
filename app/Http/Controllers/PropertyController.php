@@ -80,6 +80,30 @@ public function index(Request $request)
     {
         $property = Property::findOrFail($id);
 
+        // التحقق من صحة المدخلات (نفس قواعد store() لضمان عدم حفظ بيانات ناقصة أو غير صحيحة)
+        $request->validate([
+            'owner_id' => 'required|exists:owners,id',
+            'property_category' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            'owner_id_number' => 'nullable|string|max:100',
+            'owner_nationality' => 'nullable|string|max:100',
+            'owner_phone' => 'nullable|string|max:100',
+            'owner_landline' => 'nullable|string|max:100',
+            'owner_address' => 'nullable|string|max:255',
+            'owner_email' => 'nullable|email|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'account_number' => 'nullable|string|max:100',
+            'iban' => 'nullable|string|max:100',
+            'commission_rate' => 'nullable|numeric',
+            'insurance_account' => 'nullable|string|max:100',
+            'water_account' => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'media.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:20480',
+        ]);
+
         // 1. تحديث بيانات العقار الأساسية
         $property->update($request->except('media'));
 
@@ -166,5 +190,26 @@ public function index(Request $request)
     {
         $property = Property::with(['owner', 'units'])->findOrFail($id);
         return view('properties.show', compact('property'));
+    }
+
+    // حذف عقار
+    public function destroy($id)
+    {
+        $property = Property::withCount('units')->findOrFail($id);
+
+        // منع حذف عقار له وحدات مرتبطة به حفاظاً على سلامة البيانات
+        if ($property->units_count > 0) {
+            return redirect()->route('properties.index')
+                ->with('error', 'لا يمكن حذف هذا العقار لوجود وحدات مرتبطة به. يرجى حذف الوحدات أولاً.');
+        }
+
+        try {
+            $property->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('properties.index')
+                ->with('error', 'لا يمكن حذف هذا العقار لوجود بيانات أخرى مرتبطة به.');
+        }
+
+        return redirect()->route('properties.index')->with('success', 'تم حذف العقار بنجاح');
     }
 }

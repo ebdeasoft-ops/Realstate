@@ -128,11 +128,11 @@
                         <div class="form-group-custom">
                             <label class="form-label"><i class="fas fa-home mr-1 text-secondary"></i>
                                 {{ __('realestate.unit_type') }}</label>
-                            <select name="unit_type_id" class="form-control select2">
+                            <select name="unit_category" class="form-control select2">
                                 <option value="" disabled selected>{{ __('realestate.choose_unit_type') }}</option>
                                 @foreach(\App\Models\UnitType::all() as $type)
                                 <option value="{{ $type->id }}"
-                                    {{ old('unit_type_id') == $type->id ? 'selected' : '' }}>
+                                    {{ old('unit_category') == $type->id ? 'selected' : '' }}>
                                     {{ $type->name }}
                                 </option>
                                 @endforeach

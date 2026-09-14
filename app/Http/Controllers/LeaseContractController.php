@@ -241,4 +241,39 @@ class LeaseContractController extends Controller
 
         return redirect()->route('lease_contracts.index')->with('success', 'تم تحديث العقد وإعادة توليد الأقساط بنجاح');
     }
+
+    // حذف عقد إيجار
+    public function destroy($id)
+    {
+        $contract = LeaseContract::findOrFail($id);
+
+        // منع حذف عقد له أقساط مسددة (كلياً أو جزئياً) حفاظاً على السجل المالي
+        $hasPaidInstallments = RentInstallment::where('contract_id', $contract->id)
+            ->whereIn('status', ['paid', 'partially_paid'])
+            ->exists();
+
+        if ($hasPaidInstallments) {
+            return redirect()->route('lease_contracts.index')
+                ->with('error', 'لا يمكن حذف هذا العقد لوجود أقساط مسددة (كلياً أو جزئياً) مرتبطة به.');
+        }
+
+        try {
+            DB::transaction(function () use ($contract) {
+                // إعادة الوحدة إلى حالة "شاغرة" بعد حذف العقد
+                if ($contract->unit_id) {
+                    Unit::where('id', $contract->unit_id)->update(['is_rented' => 0]);
+                }
+
+                // حذف الأقساط غير المسددة المرتبطة بالعقد
+                RentInstallment::where('contract_id', $contract->id)->delete();
+
+                $contract->delete();
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('lease_contracts.index')
+                ->with('error', 'لا يمكن حذف هذا العقد لوجود بيانات أخرى مرتبطة به.');
+        }
+
+        return redirect()->route('lease_contracts.index')->with('success', 'تم حذف العقد بنجاح');
+    }
 }

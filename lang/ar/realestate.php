@@ -8,6 +8,8 @@ return [
     'edit' => 'تعديل',
     'update' => 'تعديل',
     'view' => 'عرض',
+    'show' => 'عرض',
+    'delete' => 'حذف',
     'actions' => 'العمليات',
     'status' => 'الحالة',
     'none' => 'لا يوجد',
@@ -23,6 +25,7 @@ return [
     'save_data' => 'حفظ البيانات',
     'payments_management'=>"ادارة الدفعات",
     // الملاك
+    'owner' => 'المالك',
     'owners' => 'الملاك',
     'add_owner' => 'إضافة مالك جديد',
     'owner_name' => 'اسم المالك',
@@ -217,6 +220,7 @@ return [
     'rooms_and_utilities' => 'المرافق والتوزيع الداخلي',
     'unit_specifications' => 'تفاصيل وخصائص الوحدة',
     'financial_details' => 'البيانات والتفاصيل المالية',
+    'financial_and_regulatory_data' => 'البيانات المالية والتنظيمية',
     'year' => "السنة",
 
     // إضافة خيارات نوع المالك

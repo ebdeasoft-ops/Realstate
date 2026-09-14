@@ -32,7 +32,10 @@
                             @endif
                         </td>
                         <td>{{ $listing->city }} @if($listing->district) — {{ $listing->district }} @endif</td>
-                        <td>{{ $listing->property_category }}</td>
+                        <?php
+$UnitType=App\Models\UnitType::find($listing->property_category);
+                        ?>
+                        <td>{{ $UnitType->name_ar??$listing->property_category }}</td>
                         <td>
                             @if($listing->type === 'rent')
                                 {{ $listing->annual_rent ? __('dashboard.price_per_year', ['price' => number_format($listing->annual_rent, 2)]) : __('dashboard.no_price') }}

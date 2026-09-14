@@ -64,6 +64,16 @@
                                         class="btn btn-sm btn-info text-white" title="تعديل العقد">
                                         <i class="fas fa-edit"></i>
                                     </a>
+
+                                    {{-- زر الحذف --}}
+                                    <form action="{{ route('lease_contracts.destroy', $contract->id) }}" method="POST"
+                                        class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا العقد؟');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" title="حذف العقد">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                             @empty

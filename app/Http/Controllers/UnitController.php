@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Unit;
 use App\Models\Property;
 use App\Models\UnitImage;
+use App\Models\LeaseContract;
 use Illuminate\Http\Request;
 
 class UnitController extends Controller
@@ -99,7 +100,28 @@ public function edit($id)
     {
         // جلب الوحدة مع العقار التابع لها والمرفقات الخاصة بها
         $unit = Unit::with(['property', 'images'])->findOrFail($id);
-        
+
         return view('units.show', compact('unit'));
+    }
+
+    // حذف وحدة
+    public function destroy($id)
+    {
+        $unit = Unit::findOrFail($id);
+
+        // منع حذف وحدة مرتبطة بعقد إيجار (حالي أو سابق) حفاظاً على سلامة البيانات
+        if (LeaseContract::where('unit_id', $unit->id)->exists()) {
+            return redirect()->route('units.index')
+                ->with('error', 'لا يمكن حذف هذه الوحدة لوجود عقود إيجار مرتبطة بها.');
+        }
+
+        try {
+            $unit->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            return redirect()->route('units.index')
+                ->with('error', 'لا يمكن حذف هذه الوحدة لوجود بيانات أخرى مرتبطة بها.');
+        }
+
+        return redirect()->route('units.index')->with('success', 'تم حذف الوحدة بنجاح');
     }
 }

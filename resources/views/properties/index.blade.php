@@ -161,9 +161,21 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="{{ route('properties.show', $property->id) }}" class="btn btn-sm btn-info btn-custom" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <a href="{{ route('properties.show', $property->id) }}" class="btn btn-sm btn-info btn-custom" title="{{ __('realestate.show') }}">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('properties.edit', $property->id) }}" class="btn btn-sm btn-primary btn-custom" title="{{ __('realestate.edit') }}">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ route('properties.destroy', $property->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('realestate.confirm_delete') ?? 'هل أنت متأكد من الحذف؟' }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger btn-custom" title="{{ __('realestate.delete') }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach

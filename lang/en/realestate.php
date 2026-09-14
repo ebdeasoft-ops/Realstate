@@ -8,6 +8,8 @@ return [
     'edit' => 'Edit',
     'update' => 'Update',
     'view' => 'View',
+    'show' => 'View',
+    'delete' => 'Delete',
     'actions' => 'Actions',
     'status' => 'Status',
     'none' => 'None',
@@ -24,6 +26,7 @@ return [
     'payments_management' => 'Payments Management',
 
     // Owners
+    'owner' => 'Owner',
     'owners' => 'Owners',
     'add_owner' => 'Add New Owner',
     'owner_name' => "Owner's Name",
@@ -218,6 +221,7 @@ return [
     'rooms_and_utilities' => 'Utilities & Internal Layout',
     'unit_specifications' => 'Unit Details & Specifications',
     'financial_details' => 'Financial Data & Details',
+    'financial_and_regulatory_data' => 'Financial & Regulatory Data',
     'year' => 'Year',
 
     // Owner type options

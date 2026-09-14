@@ -898,9 +898,11 @@ public function dashboard(Request $request)
         // ==========================================================
         // 4. تصنيف العقارات حسب نوع الوحدة (property_category)
         // ==========================================================
+        $categoryNameColumn = app()->getLocale() === 'en' ? 'unit_types.name_en' : 'unit_types.name_ar';
         $unitsByCategory = DB::table('properties')
-            ->select('property_category', DB::raw('count(*) as total'))
-            ->groupBy('property_category')
+            ->leftJoin('unit_types', 'unit_types.id', '=', 'properties.property_category')
+            ->select(DB::raw("COALESCE($categoryNameColumn, properties.property_category) as property_category"), DB::raw('count(*) as total'))
+            ->groupBy('properties.property_category', 'unit_types.name_ar', 'unit_types.name_en')
             ->get();
  
         // ==========================================================
@@ -986,7 +988,11 @@ public function dashboard(Request $request)
         $availableListings = $this->getFilteredListings($filters);
  
         $listingCities     = DB::table('properties')->select('city')->whereNotNull('city')->distinct()->pluck('city');
-        $listingCategories = DB::table('properties')->select('property_category')->whereNotNull('property_category')->distinct()->pluck('property_category');
+        $listingCategoryColumn = app()->getLocale() === 'en' ? 'name_en' : 'name_ar';
+        $listingCategories = DB::table('unit_types')
+            ->select('id', DB::raw("$listingCategoryColumn as name"))
+            ->orderBy('id')
+            ->get();
         return view('index', compact(
             'totalUnits',
             'totalTenants',
@@ -1024,8 +1030,12 @@ public function dashboard(Request $request)
      */
     private function getFilteredListings(array $filters)
     {
+        // عمود اسم التصنيف حسب لغة الموقع الحالية (نفس المنطق المستخدم في UnitType::getNameAttribute)
+        $categoryNameColumn = app()->getLocale() === 'en' ? 'unit_types.name_en' : 'unit_types.name_ar';
+
         $listingsQuery = DB::table('properties')
             ->leftJoin('units', 'units.property_id', '=', 'properties.id')
+            ->leftJoin('unit_types', 'unit_types.id', '=', 'properties.property_category')
             ->select(
                 'properties.id',
                 'properties.name',
@@ -1033,6 +1043,7 @@ public function dashboard(Request $request)
                 'properties.city',
                 'properties.district',
                 'properties.property_category',
+                DB::raw("COALESCE($categoryNameColumn, properties.property_category) as property_category_label"),
                 'properties.sale_price',
                 'properties.annual_rent',
                 DB::raw('COUNT(units.id) as units_total'),
@@ -1041,6 +1052,7 @@ public function dashboard(Request $request)
             ->groupBy(
                 'properties.id', 'properties.name', 'properties.type', 'properties.city',
                 'properties.district', 'properties.property_category',
+                'unit_types.name_ar', 'unit_types.name_en',
                 'properties.sale_price', 'properties.annual_rent'
             );
  

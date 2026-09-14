@@ -1026,4 +1026,11 @@ return [
     'main_warehouse' => 'المخزن الرئيسي',
     'secandry_warehouses' => 'المخازن الفرعية',
     'national_id'=>"رقم الهوية ",
+
+    // شريط اللغة وحالة الربط مع هيئة الزكاة والضريبة
+    'select_language' => 'اختر اللغة',
+    'zatca_authority' => 'هيئة الزكاة والضريبة والجمارك',
+    'live' => 'مباشر',
+    'integration_status_stable' => 'حالة الربط مستقرة',
+    'all_invoices_sent_successfully' => 'تم إرسال جميع الفواتير بنجاح',
 ];

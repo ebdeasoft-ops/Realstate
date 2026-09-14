@@ -978,4 +978,11 @@ return [
     'warehouses' => 'Warehouses',
     'main_warehouse' => 'Main Warehouse',
     'secandry_warehouses' => 'Secondary Warehouses',
+
+    // Language switcher & ZATCA integration status widget
+    'select_language' => 'Select Language',
+    'zatca_authority' => 'Zakat, Tax and Customs Authority',
+    'live' => 'Live',
+    'integration_status_stable' => 'Integration status stable',
+    'all_invoices_sent_successfully' => 'All invoices sent successfully',
 ];

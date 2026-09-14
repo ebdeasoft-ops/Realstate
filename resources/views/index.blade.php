@@ -172,7 +172,7 @@
                 <select name="category" class="form-control">
                     <option value="">{{ __('dashboard.filter_all_types') }}</option>
                     @foreach($listingCategories ?? [] as $cat)
-                        <option value="{{ $cat }}" {{ ($filters['category'] ?? '') == $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                        <option value="{{ $cat->id }}" {{ ($filters['category'] ?? '') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
                     @endforeach
                 </select>
             </div>
