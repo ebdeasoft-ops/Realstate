@@ -26,18 +26,14 @@
     top: 0;
     position: fixed;
     z-index: 1; } }
-/* تكبير وتخين عناوين القائمة الرئيسية */
 .side-menu__label {
-    font-size: 20px !important; /* كبر الرقم زي ما تحب */
-    font-weight: 900 !important; /* أقصى درجة للتخن */
+    font-size: 14px;
+    font-weight: 600;
 }
 
-
-
-/* تكبير الأيقونات بجانب الكلام لتتناسق مع حجم الخط */
 .side-menu__icon {
-    width: 22px !important;
-    height: 22px !important;
+    width: 18px;
+    height: 18px;
 }
 @media (max-width: 767px) {
   .app {
@@ -602,8 +598,8 @@ slide is-expanded side-menu__item {
   align-items: center;
   font-size: 14px;
   height: 32px;
-  padding: 0 56px 0 0;
-  font-weight: 900;
+  padding: 0 45px 0 15px;
+  font-weight: 500;
   margin: 4px 0; }
   .slide-item .icon {
     margin-right: 5px; }

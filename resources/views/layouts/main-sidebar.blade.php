@@ -1,252 +1,550 @@
 <style>
 /* =====================================================================
-   EBDEA SOFT — Sidebar Design Tokens (Corporate / Trust identity)
-   Navy + Steel Blue + Slate, built for a Real Estate ERP
+   EBDEA SOFT — Executive Dark Navy + Orange Sidebar (Real Estate)
    ===================================================================== */
-:root{
-    --sb-navy-950:      #0B1B33;
-    --sb-navy-900:      #102A4C;
-    --sb-navy-800:      #16375F;
-    --sb-blue-600:      #2F6FED;
-    --sb-blue-500:      #4C8DFF;
-    --sb-slate-300:     #B9C4D6;
-    --sb-slate-400:     #8CA0BD;
-    --sb-slate-500:     #6B7FA0;
-    --sb-line:          rgba(255,255,255,.08);
-    --sb-line-soft:     rgba(255,255,255,.05);
-    --sb-white:         #F5F8FC;
-    --sb-danger:        #EF5A6F;
-    --sb-radius:        10px;
-    --sb-width:         250px;
-    --sb-font:          'IBM Plex Sans Arabic','Cairo','Segoe UI',system-ui,sans-serif;
+:root {
+    --sb-width: 250px;
+    --sb-bg: #05070c;
+    --sb-surface: #1e293b;
+    --sb-surface-hover: #293548;
+    --sb-accent-orange: #f97316;
+    --sb-accent-amber: #fb923c;
+    --sb-border: rgba(255, 255, 255, 0.08);
+    --sb-text-dark: #f8fafc;
+    --sb-text-main: #f8fafc;
+    --sb-text-muted: #cbd5e1;
+    --sb-text-dim: #94a3b8;
+    --sb-radius: 10px;
 }
 
-/* ---- shell ---------------------------------------------------------- */
+/* Base Sidebar Shell */
 .app-sidebar,
 .app-sidebar.sidebar-scroll,
-html body .app-sidebar{
+html body .app-sidebar {
     position: fixed;
-    top: 0; bottom: 0;
-    inset-inline-end: 0;              /* RTL/LTR aware: right in RTL, left in LTR */
+    top: 0;
+    bottom: 0;
     width: var(--sb-width);
     height: 100vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     z-index: 1000;
-    background: linear-gradient(180deg, var(--sb-navy-950) 0%, var(--sb-navy-900) 100%) !important;
-    border-inline-start: 1px solid var(--sb-line);
-    font-family: var(--sb-font);
-    box-shadow: 0 0 40px rgba(0,0,0,.25);
+    background: var(--sb-bg) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+    transition: transform 0.25s ease, width 0.25s ease;
 }
 
-/* the base theme wraps everything in .main-sidemenu — force it transparent
-   so the gradient above always shows through, no matter what the theme's
-   own stylesheet sets on it */
+/* Force container transparent so dark navy shows through */
 .app-sidebar .main-sidemenu,
-.app-sidebar .main-sidemenu > div{
+.app-sidebar .main-sidemenu > div {
     background: transparent !important;
 }
 
-.app-sidebar::-webkit-scrollbar{ width: 5px; }
-.app-sidebar::-webkit-scrollbar-thumb{ background: var(--sb-navy-800); border-radius: 10px; }
-.app-sidebar::-webkit-scrollbar-track{ background: transparent; }
+/* Slim scrollbar */
+.app-sidebar::-webkit-scrollbar { width: 5px; }
+.app-sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+.app-sidebar::-webkit-scrollbar-track { background: transparent; }
 
-.app-sidebar .slide.is-expanded > .slide-menu{ display: block !important; }
+/* Keep expanded menus visible */
+.app-sidebar .slide.is-expanded > .slide-menu { display: block !important; }
 
-/* ---- header / brand -------------------------------------------------- */
-.app-sidebar .main-sidebar-header{
+/* ---- Brand Header ---- */
+.app-sidebar .main-sidebar-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 68px;
-    border-bottom: 1px solid var(--sb-line);
-    background: var(--sb-navy-950) !important;
+    height: 64px;
+    border-bottom: 1px solid var(--sb-border) !important;
+    background: var(--sb-bg) !important;
 }
-.app-sidebar .main-sidebar-header .main-logo{ max-height: 36px; }
-.app-sidebar .main-sidebar-header .logo-icon{ max-height: 30px; }
+.app-sidebar .main-sidebar-header .main-logo { max-height: 38px; }
+.app-sidebar .main-sidebar-header .logo-icon { max-height: 32px; }
 
-/* ---- user card --------------------------------------------------------*/
-.app-sidebar .app-sidebar__user{
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--sb-line);
-    background: transparent !important;
+/* ---- User Profile Card ---- */
+.app-sidebar .app-sidebar__user {
+    padding: 12px 14px;
+    margin: 10px 10px 6px;
+    background: var(--sb-surface) !important;
+    border: 1px solid var(--sb-border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
 }
-.app-sidebar .app-sidebar__user .dropdown,
-.app-sidebar .app-sidebar__user .user-pro-body{
-    background: transparent !important;
+.app-sidebar .app-sidebar__user .user-pro-body {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
-.app-sidebar .app-sidebar__user .avatar{
-    width: 44px; height: 44px;
+.app-sidebar .app-sidebar__user .avatar {
+    width: 40px;
+    height: 40px;
     border-radius: 50% !important;
     object-fit: cover !important;
-    border: 2px solid var(--sb-blue-600);
+    border: 2px solid #f97316;
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.35);
+    flex-shrink: 0;
 }
-.app-sidebar .app-sidebar__user .user-info{ background: transparent !important; }
-.app-sidebar .app-sidebar__user .user-info h4{
-    color: var(--sb-white) !important;
-    font-size: 14px;
-    font-weight: 600;
+.app-sidebar .app-sidebar__user .user-info {
+    overflow: hidden;
+    flex: 1;
+}
+.app-sidebar .app-sidebar__user .user-info h4 {
+    color: var(--sb-text-main) !important;
+    font-size: 13.5px;
+    font-weight: 700;
     margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.app-sidebar .app-sidebar__user .user-info span{
-    color: var(--sb-slate-400) !important;
-    font-size: 12px;
+.app-sidebar .app-sidebar__user .user-info span {
+    color: var(--sb-text-muted) !important;
+    font-size: 11px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* language switch pill inside the user card */
-.app-sidebar .sb-lang-switch{
+/* Language switcher pill inside user card */
+.app-sidebar .sb-lang-switch {
     display: flex !important;
     width: 100% !important;
-    margin-top: 12px !important;
-    background: var(--sb-navy-800) !important;
-    border-radius: 999px !important;
-    padding: 3px !important;
+    margin-top: 10px !important;
+    background: #030509 !important;
+    border: 1px solid var(--sb-border) !important;
+    border-radius: 20px !important;
+    padding: 2px !important;
     gap: 3px !important;
 }
-.app-sidebar .sb-lang-switch a{
+.app-sidebar .sb-lang-switch a {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     flex: 1 1 0% !important;
     text-align: center !important;
-    font-size: 11px !important;
+    font-size: 11.5px !important;
     font-weight: 700 !important;
-    padding: 6px 4px !important;
-    border-radius: 999px !important;
-    color: var(--sb-slate-300) !important;
+    padding: 4px 6px !important;
+    border-radius: 16px !important;
+    color: var(--sb-text-muted) !important;
     text-decoration: none !important;
-    transition: background .15s ease, color .15s ease;
+    transition: all .15s ease !important;
 }
-.app-sidebar .sb-lang-switch a.active{
-    background: var(--sb-blue-600) !important;
-    color: #fff !important;
+.app-sidebar .sb-lang-switch a:hover {
+    color: var(--sb-text-main) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+.app-sidebar .sb-lang-switch a.active {
+    background: var(--sb-accent-orange) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4) !important;
 }
 
-/* ---- menu ------------------------------------------------------------ */
+/* ---- Menu List ---- */
 .app-sidebar .side-menu,
-.app-sidebar ul.side-menu{ list-style: none; margin: 0; padding: 10px 12px 24px; background: transparent !important; }
-
-.app-sidebar .side-menu__item{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 12px;
-    margin: 2px 0;
-    border-radius: var(--sb-radius);
-    color: var(--sb-slate-300) !important;
-    font-size: 13.5px;
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
+.app-sidebar ul.side-menu {
+    list-style: none;
+    margin: 0;
+    padding: 4px 8px 30px;
     background: transparent !important;
-    transition: background .15s ease, color .15s ease;
 }
-.side-menu__item:hover{
-    background: var(--sb-line-soft);
-    color: var(--sb-white);
-}
-.side-menu__icon{
-    width: 18px; height: 18px;
-    flex-shrink: 0;
-    color: var(--sb-slate-400);
-    fill: currentColor;
-    transition: color .15s ease;
-}
-.side-menu__item:hover .side-menu__icon{ color: var(--sb-blue-500); }
 
-.side-menu__label{ flex: 1; }
-
-.angle{
+/* Section Category Eyebrow */
+.app-sidebar .side-menu__eyebrow {
+    padding: 16px 10px 6px;
     font-size: 11px;
-    color: var(--sb-slate-500);
-    transition: transform .2s ease;
-}
-.slide.is-expanded > .side-menu__item .angle{ transform: rotate(180deg); }
-
-/* active state (server should add .active on current route's <li class="slide">) */
-.slide.active > .side-menu__item,
-.slide-item.active{
-    background: var(--sb-blue-600);
-    color: var(--sb-white) !important;
-}
-.slide.active > .side-menu__item .side-menu__icon{ color: var(--sb-white); }
-
-/* section eyebrow labels — encode grouping, not decoration */
-.side-menu__eyebrow{
-    padding: 16px 14px 6px;
-    font-size: 10.5px;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: var(--sb-slate-500);
-}
-.side-menu__eyebrow:first-child{ padding-top: 6px; }
-
-/* sub menu */
-.slide-menu{
-    list-style: none;
-    margin: 2px 0 6px;
-    padding-inline-start: 14px;
-    border-inline-start: 1px solid var(--sb-line);
-    margin-inline-start: 24px;
-}
-.slide-menu .slide-item{
+    color: #fb923c !important;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--sb-slate-400);
-    text-decoration: none;
-    transition: background .15s ease, color .15s ease;
+    gap: 7px;
+    text-shadow: 0 1px 4px rgba(249, 115, 22, 0.25);
 }
-.slide-menu .slide-item:hover{
-    background: var(--sb-line-soft);
-    color: var(--sb-white);
+.app-sidebar .side-menu__eyebrow:first-child {
+    padding-top: 2px;
 }
-.slide-menu .slide-item i,
-.slide-menu .slide-item svg{
-    width: 15px;
-    font-size: 13px;
-    color: var(--sb-slate-500);
+.app-sidebar .side-menu__eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f97316;
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.9);
+    display: inline-block;
+    flex-shrink: 0;
 }
-
-/* nested (level-2) sub menu, e.g. reports groups */
-.sub-side-menu__item{
-    display: flex;
-    align-items: center;
-    padding: 9px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--sb-slate-300);
-    text-decoration: none;
-    cursor: pointer;
-}
-.sub-side-menu__label{ flex: 1; }
-.slide-menu .slide-menu{ margin-inline-start: 12px; }
-
-/* logout — visually distinct, always at reach */
-.side-menu__item.sb-logout{ color: var(--sb-danger); }
-.side-menu__item.sb-logout .side-menu__icon{ color: var(--sb-danger); }
-.side-menu__item.sb-logout:hover{ background: rgba(239,90,111,.12); }
-
-/* divider */
-.sb-divider{
+.app-sidebar .side-menu__eyebrow::after {
+    content: '';
+    flex: 1;
     height: 1px;
-    background: var(--sb-line);
-    margin: 10px 14px;
+    background: linear-gradient(90deg, rgba(249, 115, 22, 0.45) 0%, rgba(249, 115, 22, 0.1) 60%, transparent 100%);
 }
 
-@media (max-width: 991px){
-    .app-sidebar{ transform: translateX(100%); transition: transform .25s ease; }
-    [dir="ltr"] .app-sidebar{ transform: translateX(-100%); }
-    .app-sidebar.sidebar-open{ transform: translateX(0); }
+/* Menu Items */
+.app-sidebar .side-menu__item,
+html body .app-sidebar .side-menu__item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 9.5px 13px !important;
+    margin: 4px 0 !important;
+    border-radius: var(--sb-radius) !important;
+    background: rgba(30, 41, 59, 0.55) !important;
+    border: 1px solid rgba(249, 115, 22, 0.3) !important;
+    border-inline-start: 3.5px solid rgba(249, 115, 22, 0.55) !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all .2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+}
+
+/* Menu Text Label - ALWAYS High Contrast & Visible */
+.app-sidebar .side-menu__label,
+.app-sidebar .side-menu__item .side-menu__label,
+html body .app-sidebar .side-menu__label {
+    flex: 1 !important;
+    color: #e2e8f0 !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Menu Icons - Orange & Visible */
+.app-sidebar .side-menu__icon,
+.app-sidebar .side-menu__item i,
+.app-sidebar .side-menu__item svg,
+html body .app-sidebar .side-menu__icon {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 16px !important;
+    flex-shrink: 0 !important;
+    color: #cbd5e1 !important;
+    fill: #cbd5e1 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: color .15s ease, fill .15s ease !important;
+}
+
+/* Chevron arrow */
+.app-sidebar .angle,
+.app-sidebar .side-menu__item .angle {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    transition: transform .2s ease !important;
+    margin-inline-start: auto !important;
+}
+.app-sidebar .slide.is-expanded > .side-menu__item .angle {
+    transform: rotate(180deg) !important;
+    color: #fb923c !important;
+}
+
+/* Hover Menu Item */
+.app-sidebar .side-menu__item:hover {
+    background: rgba(249, 115, 22, 0.13) !important;
+    border-color: rgba(249, 115, 22, 0.75) !important;
+    border-inline-start-color: #f97316 !important;
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.24) !important;
+}
+.app-sidebar .side-menu__item:hover .side-menu__label {
+    color: #ffffff !important;
+}
+.app-sidebar .side-menu__item:hover .side-menu__icon {
+    color: #fb923c !important;
+    fill: #fb923c !important;
+}
+
+/* Active Menu Item */
+.app-sidebar .slide.active > .side-menu__item,
+html body .app-sidebar .slide.active > .side-menu__item {
+    background: linear-gradient(90deg, rgba(249, 115, 22, 0.25) 0%, rgba(249, 115, 22, 0.08) 100%) !important;
+    border: 1px solid rgba(249, 115, 22, 0.8) !important;
+    border-inline-start: 4px solid #f97316 !important;
+    border-radius: var(--sb-radius) !important;
+    box-shadow: 0 4px 18px rgba(249, 115, 22, 0.3) !important;
+}
+.app-sidebar .slide.active > .side-menu__item .side-menu__label,
+html body .app-sidebar .slide.active > .side-menu__item .side-menu__label {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+.app-sidebar .slide.active > .side-menu__item .side-menu__icon,
+.app-sidebar .slide.active > .side-menu__item i,
+.app-sidebar .slide.active > .side-menu__item svg {
+    color: #fb923c !important;
+    fill: #fb923c !important;
+}
+.app-sidebar .slide.active > .side-menu__item .angle {
+    color: #fb923c !important;
+}
+
+/* Pending-count badge inside menu items */
+.app-sidebar .badge-warning {
+    background: var(--sb-accent-orange) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* Submenu container */
+.app-sidebar .slide-menu {
+    list-style: none !important;
+    margin: 3px 0 8px !important;
+    padding: 6px !important;
+    padding-inline-start: 12px !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    border-inline-start: 2px solid rgba(249, 115, 22, 0.35) !important;
+    margin-inline-start: 20px !important;
+    border-radius: var(--sb-radius) !important;
+    box-shadow: none !important;
+}
+
+/* Submenu items */
+.app-sidebar .slide-menu .slide-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 7px 11px !important;
+    margin: 2px 0 !important;
+    border-radius: 7px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #94a3b8 !important;
+    text-decoration: none !important;
+    transition: all .15s ease !important;
+    white-space: nowrap !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+    position: relative;
+}
+.app-sidebar .slide-menu .slide-item:hover {
+    background: rgba(249, 115, 22, 0.12) !important;
+    color: #ffffff !important;
+    padding-inline-start: 14px !important;
+}
+.app-sidebar .slide-menu .slide-item.active {
+    background: rgba(249, 115, 22, 0.2) !important;
+    color: #fb923c !important;
+    font-weight: 800 !important;
+}
+.app-sidebar .slide-menu .slide-item i,
+.app-sidebar .slide-menu .slide-item svg {
+    font-size: 13px !important;
+    width: 14px !important;
+    color: #94a3b8 !important;
+    flex-shrink: 0 !important;
+}
+.app-sidebar .slide-menu .slide-item:hover i,
+.app-sidebar .slide-menu .slide-item.active i {
+    color: #f97316 !important;
+}
+
+/* Level-2 Nested Submenu */
+.app-sidebar .sub-side-menu__item {
+    display: flex !important;
+    align-items: center !important;
+    padding: 7px 10px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    color: #cbd5e1 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+}
+.app-sidebar .sub-side-menu__item:hover {
+    background: rgba(249, 115, 22, 0.12) !important;
+    color: #ffffff !important;
+}
+.app-sidebar .sub-side-menu__label {
+    flex: 1 !important;
+}
+
+/* Logout Item */
+.app-sidebar .side-menu__item.sb-logout {
+    color: #fb7185 !important;
+    margin-top: 10px;
+    border: 1px solid rgba(244, 63, 94, 0.25) !important;
+    background: rgba(244, 63, 94, 0.08) !important;
+    border-inline-start: 3.5px solid rgba(244, 63, 94, 0.55) !important;
+}
+.app-sidebar .side-menu__item.sb-logout .side-menu__label {
+    color: #fb7185 !important;
+}
+.app-sidebar .side-menu__item.sb-logout .side-menu__icon {
+    color: #fb7185 !important;
+}
+.app-sidebar .side-menu__item.sb-logout:hover {
+    background: rgba(244, 63, 94, 0.18) !important;
+}
+.app-sidebar .side-menu__item.sb-logout:hover .side-menu__label,
+.app-sidebar .side-menu__item.sb-logout:hover .side-menu__icon {
+    color: #ffffff !important;
+}
+
+/* Divider */
+.app-sidebar .sb-divider {
+    height: 1px !important;
+    background: var(--sb-border) !important;
+    margin: 8px 6px !important;
+}
+
+/* Mobile responsive drawer */
+@media (max-width: 991px) {
+    .app-sidebar.sidebar-open,
+    .sidenav-toggled .app-sidebar {
+        transform: translateX(0) !important;
+    }
+}
+
+/* [إصلاح] فرض ظهور تسمية العنصر الرئيسي في كل الأحوال، حتى لو القالب حط أي كلاس
+   على body بيخفيها بشكل افتراضي (زي أوضاع "أيقونات فقط" الشائعة في القوالب دي) -
+   ده كان سبب اختفاء نص عناصر القائمة الرئيسية بينما نص القوائم الفرعية كان ظاهر عادي. */
+body .app-sidebar .side-menu__item .side-menu__label,
+html body .app-sidebar .side-menu__item .side-menu__label,
+body.icontext-menu .app-sidebar .side-menu__item .side-menu__label,
+body.closed-menu .app-sidebar .side-menu__item .side-menu__label,
+body.sidenav-toggled .app-sidebar .side-menu__item .side-menu__label,
+body.mini-sidebar .app-sidebar .side-menu__item .side-menu__label {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: auto !important;
+    max-width: none !important;
+    position: static !important;
+    color: #e2e8f0 !important;
+    background: transparent !important;
+    font-size: 13.5px !important;
+}
+
+/* احتياط إضافي: لو فيه أي عنصر تاني (زي شريط تحميل placeholder) راكب فوق التسمية
+   ومغطّيها، الكود ده بيخليه بايظ/شفاف بدل ما يغطي النص */
+.app-sidebar .side-menu__item .side-menu__label::before,
+.app-sidebar .side-menu__item .side-menu__label::after {
+    content: none !important;
+    background: none !important;
+}
+
+/* [تم الإصلاح] الشاشة دي ماكانتش متجاوبة (Responsive) مع شاشات الموبايل - العناصر كانت بتتزنق
+   أو بتخرج بره حدود الشاشة. الكود ده بيظبط العرض على الشاشات الصغيرة (تابلت وموبايل). */
+@media (max-width: 991px) {
+    .breadcrumb-header, .main-parent > .breadcrumb-header {
+        flex-wrap: wrap !important;
+        row-gap: 10px;
+    }
+    .card-header form .row, .card-header .row {
+        row-gap: 10px;
+    }
+    .row > [class*="col-"] {
+        margin-bottom: 10px;
+    }
+}
+@media (max-width: 767px) {
+    .content-title { font-size: 16px !important; }
+    .card-header { padding: 14px !important; }
+    .btn, .button-eng {
+        width: 100% !important;
+        justify-content: center !important;
+        margin-bottom: 8px;
+    }
+    .d-flex.justify-content-center, .d-flex.justify-content-end, .d-flex.justify-content-between {
+        flex-wrap: wrap !important;
+        row-gap: 10px;
+        justify-content: center !important;
+    }
+    center > form, center {
+        width: 100%;
+    }
+    button[style*="width"], a[style*="width"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 8px;
+    }
+    .modal-dialog, .modal-special {
+        max-width: 94vw !important;
+        width: 94vw !important;
+        margin: 6vh auto !important;
+    }
+    table.our-table, table.table {
+        font-size: 11.5px !important;
+    }
+    table.our-table thead th, table.table thead th {
+        padding: 8px 6px !important;
+        font-size: 11px !important;
+    }
+    table.our-table tbody td, table.table tbody td {
+        padding: 6px !important;
+    }
+    .form-control, input, select.select2, textarea {
+        font-size: 16px !important;
+    }
+    .select2-container .select2-selection--single .select2-selection__rendered {
+        font-size: 14px !important;
+    }
 }
 </style>
+
+{{-- =========================================================
+     BULLETPROOF LOCALE-BASED DIRECTION & LAYOUT POSITIONING
+     ========================================================= --}}
+@if (App::getLocale() == 'ar')
+<style>
+.app-sidebar,
+.app-sidebar.sidebar-scroll,
+html body .app-sidebar {
+    right: 0 !important;
+    left: auto !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-right: none !important;
+}
+@media (min-width: 768px) {
+    .app-content,
+    body .app-content,
+    .main-content.app-content {
+        margin-right: 245px !important;
+        margin-left: 0 !important;
+    }
+}
+@media (max-width: 991px) {
+    .app-sidebar {
+        transform: translateX(100%);
+        transition: transform .25s ease;
+    }
+}
+</style>
+@else
+<style>
+.app-sidebar,
+.app-sidebar.sidebar-scroll,
+html body .app-sidebar {
+    left: 0 !important;
+    right: auto !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-left: none !important;
+}
+@media (min-width: 768px) {
+    .app-content,
+    body .app-content,
+    .main-content.app-content {
+        margin-left: 245px !important;
+        margin-right: 0 !important;
+    }
+}
+@media (max-width: 991px) {
+    .app-sidebar {
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+    }
+}
+</style>
+@endif
 
 <!-- main-sidebar -->
 <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
@@ -280,17 +578,16 @@ html body .app-sidebar{
                 </div>
             </div>
 
-            {{-- Localization switch — swaps the /ar/ or /en/ prefix on the current URL,
-                 matching the existing App\Http\Middleware\SetLocale prefix-based setup.
-                 No extra named route needed. --}}
-            @php
-                $sbCurrentPath = request()->path();               // e.g. "ar/dashboard"
-                $sbSegments    = explode('/', $sbCurrentPath);
-                $sbRest        = implode('/', array_slice($sbSegments, 1)); // path without the locale segment
-            @endphp
+            {{-- Segmented Language Toggle Pill --}}
             <div class="sb-lang-switch">
-                <a href="{{ url('ar/' . $sbRest) }}" class="{{ app()->getLocale() === 'ar' ? 'active' : '' }}">العربية</a>
-                <a href="{{ url('en/' . $sbRest) }}" class="{{ app()->getLocale() === 'en' ? 'active' : '' }}">English</a>
+                <a href="{{ LaravelLocalization::getLocalizedURL('ar', null, [], true) }}"
+                   class="{{ app()->getLocale() === 'ar' ? 'active' : '' }}">
+                   العربية
+                </a>
+                <a href="{{ LaravelLocalization::getLocalizedURL('en', null, [], true) }}"
+                   class="{{ app()->getLocale() === 'en' ? 'active' : '' }}">
+                   English
+                </a>
             </div>
         </div>
 
@@ -369,6 +666,26 @@ html body .app-sidebar{
                 </ul>
             </li>
             @endcan
+
+            @canany(['Properties', 'Show properties', 'Tenants Management'])
+            <li class="slide">
+                <a class="side-menu__item" data-toggle="slide" href="#">
+                    <i class="fas fa-clipboard-list side-menu__icon"></i>
+                    <span class="side-menu__label">{{ __('realestate.property_requests') }}</span>
+                    @php
+                        $pendingRequestsCount = \App\Models\PropertyRequest::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingRequestsCount > 0)
+                        <span class="badge badge-warning ml-auto text-dark font-weight-bold" style="font-size: 11px;">{{ $pendingRequestsCount }}</span>
+                    @endif
+                    <i class="angle fe fe-chevron-down"></i>
+                </a>
+                <ul class="slide-menu">
+                    <li><a class="slide-item" href="{{ route('property-requests.index') }}"><i class="bx bx-list-ul"></i>{{ __('realestate.property_requests_list') }}</a></li>
+                    <li><a class="slide-item" href="{{ route('property-requests.create') }}"><i class="bx bx-plus-circle"></i>{{ __('realestate.add_property_request') }}</a></li>
+                </ul>
+            </li>
+            @endcanany
 
             @can('Lease Contracts')
             <li class="slide">

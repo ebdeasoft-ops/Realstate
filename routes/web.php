@@ -55,8 +55,8 @@ use App\Http\Controllers\{
     TenantController,
     PaymentController,
     PropertyExpenseController,
-    UnitTypeController
-    
+    UnitTypeController,
+    PropertyRequestController
     };
 /*
 |--------------------------------------------------------------------------
@@ -105,6 +105,11 @@ Route::resource('units', UnitController::class);
 Route::resource('owners', OwnerController::class);
 Route::resource('properties', PropertyController::class);
 Route::resource('lease_contracts', LeaseContractController::class);
+
+// مسارات طلبات التسكين وقائمة الانتظار
+Route::post('property-requests/{id}/status', [PropertyRequestController::class, 'updateStatus'])->name('property-requests.update-status');
+Route::post('property-requests/{id}/fulfill', [PropertyRequestController::class, 'fulfill'])->name('property-requests.fulfill');
+Route::resource('property-requests', PropertyRequestController::class);
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/custodies', [CustodyController::class, 'index'])->name('custodies.index');
