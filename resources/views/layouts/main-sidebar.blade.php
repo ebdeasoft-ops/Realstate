@@ -157,7 +157,7 @@ html body .app-sidebar {
     font-weight: 800;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: #fb923c !important;
+    color: #f8fafc !important;
     display: flex;
     align-items: center;
     gap: 7px;
@@ -330,8 +330,8 @@ html body .app-sidebar .slide.active > .side-menu__item .side-menu__label {
     padding-inline-start: 14px !important;
 }
 .app-sidebar .slide-menu .slide-item.active {
-    background: rgba(249, 115, 22, 0.2) !important;
-    color: #fb923c !important;
+     background: rgba(249, 115, 22, 0.2) !important;
+    color: #ffffff !important;
     font-weight: 800 !important;
 }
 .app-sidebar .slide-menu .slide-item i,
